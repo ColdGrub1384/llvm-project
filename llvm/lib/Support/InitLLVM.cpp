@@ -60,4 +60,4 @@ InitLLVM::InitLLVM(int &Argc, const char **&Argv,
 #endif
 }
 
-InitLLVM::~InitLLVM() { llvm_shutdown(); }
+InitLLVM::~InitLLVM() { /*llvm_shutdown();*/ }

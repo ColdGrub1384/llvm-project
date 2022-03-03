@@ -77,7 +77,7 @@ void sys::RunSignalHandlers() {
 // Signal-safe.
 static void insertSignalHandler(sys::SignalHandlerCallback FnPtr,
                                 void *Cookie) {
-  for (size_t I = 0; I < MaxSignalHandlerCallbacks; ++I) {
+  /*for (size_t I = 0; I < MaxSignalHandlerCallbacks; ++I) {
     auto &SetMe = CallBacksToRun[I];
     auto Expected = CallbackAndCookie::Status::Empty;
     auto Desired = CallbackAndCookie::Status::Initializing;
@@ -88,7 +88,7 @@ static void insertSignalHandler(sys::SignalHandlerCallback FnPtr,
     SetMe.Flag.store(CallbackAndCookie::Status::Initialized);
     return;
   }
-  report_fatal_error("too many signal callbacks already registered");
+  report_fatal_error("too many signal callbacks already registered");*/
 }
 
 static bool findModulesAndOffsets(void **StackTrace, int Depth,

@@ -351,7 +351,8 @@ static int ExecuteCC1Tool(SmallVectorImpl<const char *> &ArgV) {
   return 1;
 }
 
-int main(int Argc, const char **Argv) {
+int clang_main(int Argc, const char **Argv) {
+  llvm::cl::ResetAllOptionOccurrences();
   noteBottomOfStack();
   llvm::InitLLVM X(Argc, Argv);
   llvm::setBugReportMsg("PLEASE submit a bug report to " BUG_REPORT_URL
@@ -581,4 +582,10 @@ int main(int Argc, const char **Argv) {
   // If we have multiple failing commands, we return the result of the first
   // failing command.
   return Res;
+}
+
+int main(int Argc, const char **Argv) {
+    int ret = clang_main(Argc, Argv);
+    llvm::cl::ResetCommandLineParser();
+    return ret;
 }

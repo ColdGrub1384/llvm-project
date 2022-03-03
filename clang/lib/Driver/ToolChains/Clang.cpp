@@ -5062,8 +5062,8 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   // compiler. This way, Clang can be used to compile code with scalable vectors
   // and identify possible issues.
   if (isa<BackendJobAction>(JA)) {
-    CmdArgs.push_back("-mllvm");
-    CmdArgs.push_back("-treat-scalable-fixed-error-as-warning");
+    //CmdArgs.push_back("-mllvm");
+    //CmdArgs.push_back("-treat-scalable-fixed-error-as-warning");
   }
 
   // These two are potentially updated by AddClangCLArgs.

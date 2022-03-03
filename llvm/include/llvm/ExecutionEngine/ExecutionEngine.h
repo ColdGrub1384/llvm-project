@@ -305,7 +305,9 @@ public:
   int runFunctionAsMain(Function *Fn, const std::vector<std::string> &argv,
                         const char * const * envp);
 
-
+  int runFunctionAsMainWithoutParams(Function *Fn,
+                                                      const char * const * envp);
+    
   /// addGlobalMapping - Tell the execution engine that the specified global is
   /// at the specified location.  This is used internally as functions are JIT'd
   /// and as global variables are laid out in memory.  It can and should also be

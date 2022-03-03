@@ -1,3 +1,5 @@
+This is a fork of https://github.com/holzschu/llvm-project that supports running Python C extensions.
+
 # The LLVM Compiler Infrastructure
 
 This directory and its sub-directories contain a forked source code for LLVM,

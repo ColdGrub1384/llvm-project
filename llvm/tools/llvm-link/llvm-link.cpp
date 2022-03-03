@@ -431,13 +431,14 @@ static bool linkFiles(const char *argv0, LLVMContext &Context, Linker &L,
   return true;
 }
 
-int main(int argc, char **argv) {
+int link_main(int argc, char **argv) {
   InitLLVM X(argc, argv);
   ExitOnErr.setBanner(std::string(argv[0]) + ": ");
 
   LLVMContext Context;
   Context.setDiagnosticHandler(
     std::make_unique<LLVMLinkDiagnosticHandler>(), true);
+  
   cl::ParseCommandLineOptions(argc, argv, "llvm linker\n");
 
   if (!DisableDITypeMap)
@@ -491,4 +492,10 @@ int main(int argc, char **argv) {
   Out.keep();
 
   return 0;
+}
+
+int main(int argc, char **argv) {
+    int ret = link_main(argc, argv);
+    cl::ResetCommandLineParser();
+    return ret;
 }

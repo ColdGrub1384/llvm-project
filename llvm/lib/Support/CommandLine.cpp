@@ -1690,8 +1690,8 @@ bool Option::addOccurrence(unsigned pos, StringRef ArgName, StringRef Value,
 
   switch (getNumOccurrencesFlag()) {
   case Optional:
-    if (NumOccurrences > 1)
-      return error("may only occur zero or one times!", ArgName);
+    //if (NumOccurrences > 1)
+      //return error("may only occur zero or one times!", ArgName);
     break;
   case Required:
     if (NumOccurrences > 1)

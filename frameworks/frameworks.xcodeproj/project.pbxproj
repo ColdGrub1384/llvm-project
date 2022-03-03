@@ -243,6 +243,7 @@
 		89DD5C65239CDE7100382F34 /* libLLVMWebAssemblyInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 89DD5C60239CDE3D00382F34 /* libLLVMWebAssemblyInfo.a */; };
 		89DD5C6A239D1A1D00382F34 /* libLLVM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2237943E209B523500B15016 /* libLLVM.framework */; };
 		89DD5C6B239D1A1D00382F34 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 22C505CC209A3CB500FDDFA9 /* libc++.tbd */; };
+		B5559A31278DE85B001D6BA7 /* libFFI.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B5559A30278DE85B001D6BA7 /* libFFI.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -486,6 +487,7 @@
 		89DD5C5F239CDE3D00382F34 /* libLLVMWebAssemblyDisassembler.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libLLVMWebAssemblyDisassembler.a; path = ./lib/libLLVMWebAssemblyDisassembler.a; sourceTree = "<group>"; };
 		89DD5C60239CDE3D00382F34 /* libLLVMWebAssemblyInfo.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libLLVMWebAssemblyInfo.a; path = ./lib/libLLVMWebAssemblyInfo.a; sourceTree = "<group>"; };
 		89DD5C73239D1A1D00382F34 /* llc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = llc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B5559A30278DE85B001D6BA7 /* libFFI.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libFFI.a; path = "../build-iphoneos/lib/libFFI.a"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -585,6 +587,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B5559A31278DE85B001D6BA7 /* libFFI.a in Frameworks */,
 				22BAC5AC259CAC1300B51FD6 /* libLLVMOrcShared.a in Frameworks */,
 				22BAC5AA259CAB6B00B51FD6 /* libLLVMFrontendOpenMP.a in Frameworks */,
 				22BAC5A8259CAAA700B51FD6 /* libLLVMOrcTargetProcess.a in Frameworks */,
@@ -879,6 +882,7 @@
 		22C505C7209A3B8700FDDFA9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B5559A30278DE85B001D6BA7 /* libFFI.a */,
 				22BAC5D6259CAF2500B51FD6 /* liblldMachO2.a */,
 				22BAC5D4259CAE0800B51FD6 /* liblldWasm.a */,
 				22BAC5D2259CADCE00B51FD6 /* liblldMachO.a */,

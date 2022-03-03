@@ -380,6 +380,11 @@ void ExecutionEngine::runStaticConstructorsDestructors(Module &module,
   // an old-style (llvmgcc3) static ctor with __main linked in and in use.  If
   // this is the case, don't execute any of the global ctors, __main will do
   // it.
+
+  if (isDtors) {
+    return;
+  }
+    
   if (!GV || GV->isDeclaration() || GV->hasLocalLinkage()) return;
 
   // Should be an array of '{ i32, void ()* }' structs.  The first value is
@@ -470,6 +475,34 @@ int ExecutionEngine::runFunctionAsMain(Function *Fn,
       }
     }
   }
+
+  return runFunction(Fn, GVArgs).IntVal.getZExtValue();
+}
+
+int ExecutionEngine::runFunctionAsMainWithoutParams(Function *Fn,
+                                       const char * const * envp) {
+  std::vector<GenericValue> GVArgs;
+
+  // Check main() type
+  unsigned NumArgs = Fn->getFunctionType()->getNumParams();
+  FunctionType *FTy = Fn->getFunctionType();
+  Type* PPInt8Ty = Type::getInt8PtrTy(Fn->getContext())->getPointerTo();
+
+  // Check the argument types.
+  if (NumArgs > 3)
+    report_fatal_error("Invalid number of arguments of main() supplied");
+  if (NumArgs >= 3 && FTy->getParamType(2) != PPInt8Ty)
+    report_fatal_error("Invalid type for third argument of main() supplied");
+  if (NumArgs >= 2 && FTy->getParamType(1) != PPInt8Ty)
+    report_fatal_error("Invalid type for second argument of main() supplied");
+  if (NumArgs >= 1 && !FTy->getParamType(0)->isIntegerTy(32))
+    report_fatal_error("Invalid type for first argument of main() supplied");
+  if (!FTy->getReturnType()->isIntegerTy() &&
+      !FTy->getReturnType()->isVoidTy())
+    report_fatal_error("Invalid return type of main() supplied");
+
+  ArgvArray CArgv;
+  ArgvArray CEnv;
 
   return runFunction(Fn, GVArgs).IntVal.getZExtValue();
 }

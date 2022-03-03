@@ -2134,32 +2134,51 @@ void Interpreter::callFunction(Function *F, ArrayRef<GenericValue> ArgVals) {
   ECStack.emplace_back();
   ExecutionContext &StackFrame = ECStack.back();
   StackFrame.CurFunction = F;
+    
+  printf("1\n");
 
   // Special handling for external functions.
   if (F->isDeclaration()) {
+    printf("isDeclaration\n");
     GenericValue Result = callExternalFunction (F, ArgVals);
     // Simulate a 'ret' instruction of the appropriate type.
     popStackAndReturnValueToCaller (F->getReturnType (), Result);
     return;
   }
 
+  printf("2\n");
+  
   // Get pointers to first LLVM BB & Instruction in function.
   StackFrame.CurBB     = &F->front();
+  if (StackFrame.CurBB) {
+    printf("Is not nil\n");
+  } else {
+    printf("Is nil\n");
+  }
+  // Crashes here
   StackFrame.CurInst   = StackFrame.CurBB->begin();
 
+  printf("3\n");
+  
   // Run through the function arguments and initialize their values...
   assert((ArgVals.size() == F->arg_size() ||
          (ArgVals.size() > F->arg_size() && F->getFunctionType()->isVarArg()))&&
          "Invalid number of values passed to function invocation!");
 
+  printf("4\n");
+  
   // Handle non-varargs arguments...
   unsigned i = 0;
   for (Function::arg_iterator AI = F->arg_begin(), E = F->arg_end();
        AI != E; ++AI, ++i)
     SetValue(&*AI, ArgVals[i], StackFrame);
 
+  printf("5\n");
+  
   // Handle varargs arguments...
   StackFrame.VarArgs.assign(ArgVals.begin()+i, ArgVals.end());
+  
+  printf("6\n");
 }
 
 
