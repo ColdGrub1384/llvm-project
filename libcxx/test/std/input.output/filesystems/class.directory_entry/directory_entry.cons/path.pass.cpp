@@ -8,7 +8,7 @@
 
 // UNSUPPORTED: c++03
 
-// XFAIL: LIBCXX-WINDOWS-FIXME
+// XFAIL: LIBCXX-AIX-FIXME
 
 // <filesystem>
 
@@ -155,7 +155,8 @@ TEST_CASE(path_ctor_cannot_resolve) {
   // reading directories; test using a special inaccessible directory
   // instead.
   const path dir = GetWindowsInaccessibleDir();
-  TEST_REQUIRE(!dir.empty());
+  if (dir.empty())
+    TEST_UNSUPPORTED();
   const path file = dir / "file";
   {
     std::error_code ec = GetTestEC();

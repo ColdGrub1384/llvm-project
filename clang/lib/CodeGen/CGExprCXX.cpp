@@ -87,6 +87,7 @@ RValue CodeGenFunction::EmitCXXMemberOrOperatorCall(
   auto &FnInfo = CGM.getTypes().arrangeCXXMethodCall(
       Args, FPT, CallInfo.ReqArgs, CallInfo.PrefixSize);
   return EmitCall(FnInfo, Callee, ReturnValue, Args, nullptr,
+                  CE && CE == MustTailCall,
                   CE ? CE->getExprLoc() : SourceLocation());
 }
 
@@ -112,7 +113,7 @@ RValue CodeGenFunction::EmitCXXDestructorCall(
   commonEmitCXXMemberOrOperatorCall(*this, DtorDecl, This, ImplicitParam,
                                     ImplicitParamTy, CE, Args, nullptr);
   return EmitCall(CGM.getTypes().arrangeCXXStructorDeclaration(Dtor), Callee,
-                  ReturnValueSlot(), Args, nullptr,
+                  ReturnValueSlot(), Args, nullptr, CE && CE == MustTailCall,
                   CE ? CE->getExprLoc() : SourceLocation{});
 }
 
@@ -472,7 +473,8 @@ CodeGenFunction::EmitCXXMemberPointerCallExpr(const CXXMemberCallExpr *E,
   EmitCallArgs(Args, FPT, E->arguments());
   return EmitCall(CGM.getTypes().arrangeCXXMethodCall(Args, FPT, required,
                                                       /*PrefixSize=*/0),
-                  Callee, ReturnValue, Args, nullptr, E->getExprLoc());
+                  Callee, ReturnValue, Args, nullptr, E == MustTailCall,
+                  E->getExprLoc());
 }
 
 RValue
@@ -607,15 +609,18 @@ CodeGenFunction::EmitCXXConstructExpr(const CXXConstructExpr *E,
     return;
 
   // Elide the constructor if we're constructing from a temporary.
-  // The temporary check is required because Sema sets this on NRVO
-  // returns.
   if (getLangOpts().ElideConstructors && E->isElidable()) {
-    assert(getContext().hasSameUnqualifiedType(E->getType(),
-                                               E->getArg(0)->getType()));
-    if (E->getArg(0)->isTemporaryObject(getContext(), CD->getParent())) {
-      EmitAggExpr(E->getArg(0), Dest);
-      return;
-    }
+    // FIXME: This only handles the simplest case, where the source object
+    //        is passed directly as the first argument to the constructor.
+    //        This should also handle stepping though implicit casts and
+    //        conversion sequences which involve two steps, with a
+    //        conversion operator followed by a converting constructor.
+    const Expr *SrcObj = E->getArg(0);
+    assert(SrcObj->isTemporaryObject(getContext(), CD->getParent()));
+    assert(
+        getContext().hasSameUnqualifiedType(E->getType(), SrcObj->getType()));
+    EmitAggExpr(SrcObj, Dest);
+    return;
   }
 
   if (const ArrayType *arrayType
@@ -1047,13 +1052,8 @@ void CodeGenFunction::EmitNewArrayInitializer(
       InitListElements =
           cast<ConstantArrayType>(ILE->getType()->getAsArrayTypeUnsafe())
               ->getSize().getZExtValue();
-      CurPtr =
-          Address(Builder.CreateInBoundsGEP(CurPtr.getElementType(),
-                                            CurPtr.getPointer(),
-                                            Builder.getSize(InitListElements),
-                                            "string.init.end"),
-                  CurPtr.getAlignment().alignmentAtOffset(InitListElements *
-                                                          ElementSize));
+      CurPtr = Builder.CreateConstInBoundsGEP(
+          CurPtr, InitListElements, "string.init.end");
 
       // Zero out the rest, if any remain.
       llvm::ConstantInt *ConstNum = dyn_cast<llvm::ConstantInt>(NumElements);
@@ -1130,7 +1130,7 @@ void CodeGenFunction::EmitNewArrayInitializer(
     }
 
     // Switch back to initializing one base element at a time.
-    CurPtr = Builder.CreateBitCast(CurPtr, BeginPtr.getType());
+    CurPtr = Builder.CreateElementBitCast(CurPtr, BeginPtr.getElementType());
   }
 
   // If all elements have already been initialized, skip any further
@@ -1321,8 +1321,7 @@ static RValue EmitNewDeleteCall(CodeGenFunction &CGF,
   llvm::Function *Fn = dyn_cast<llvm::Function>(CalleePtr);
   if (CalleeDecl->isReplaceableGlobalAllocationFunction() &&
       Fn && Fn->hasFnAttribute(llvm::Attribute::NoBuiltin)) {
-    CallOrInvoke->addAttribute(llvm::AttributeList::FunctionIndex,
-                               llvm::Attribute::Builtin);
+    CallOrInvoke->addFnAttr(llvm::Attribute::Builtin);
   }
 
   return RV;
@@ -1590,7 +1589,7 @@ llvm::Value *CodeGenFunction::EmitCXXNewExpr(const CXXNewExpr *E) {
     // In these cases, discard the computed alignment and use the
     // formal alignment of the allocated type.
     if (BaseInfo.getAlignmentSource() != AlignmentSource::Decl)
-      allocation = Address(allocation.getPointer(), allocAlign);
+      allocation = allocation.withAlignment(allocAlign);
 
     // Set up allocatorArgs for the call to operator delete if it's not
     // the reserved global operator.
@@ -1660,7 +1659,7 @@ llvm::Value *CodeGenFunction::EmitCXXNewExpr(const CXXNewExpr *E) {
           allocationAlign, getContext().toCharUnitsFromBits(AllocatorAlign));
     }
 
-    allocation = Address(RV.getScalarVal(), allocationAlign);
+    allocation = Address(RV.getScalarVal(), Int8Ty, allocationAlign);
   }
 
   // Emit a null check on the allocation result if the allocation
@@ -1721,8 +1720,7 @@ llvm::Value *CodeGenFunction::EmitCXXNewExpr(const CXXNewExpr *E) {
   // of optimization level.
   if (CGM.getCodeGenOpts().StrictVTablePointers &&
       allocator->isReservedGlobalPlacementOperator())
-    result = Address(Builder.CreateLaunderInvariantGroup(result.getPointer()),
-                     result.getAlignment());
+    result = Builder.CreateLaunderInvariantGroup(result);
 
   // Emit sanitizer checks for pointer value now, so that in the case of an
   // array it was checked only once and not at each constructor call. We may

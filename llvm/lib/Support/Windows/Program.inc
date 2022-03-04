@@ -103,6 +103,7 @@ ErrorOr<std::string> sys::findProgramByName(StringRef Name,
   if (U8Result.empty())
     return mapWindowsError(::GetLastError());
 
+  llvm::sys::path::make_preferred(U8Result);
   return std::string(U8Result.begin(), U8Result.end());
 }
 
@@ -488,6 +489,18 @@ ProcessInfo sys::Wait(const ProcessInfo &PI, unsigned SecondsToWait,
   return WaitResult;
 }
 
+std::error_code llvm::sys::ChangeStdinMode(sys::fs::OpenFlags Flags){
+  if (!(Flags & fs::OF_CRLF))
+    return ChangeStdinToBinary();
+  return std::error_code();
+}
+
+std::error_code llvm::sys::ChangeStdoutMode(sys::fs::OpenFlags Flags){
+  if (!(Flags & fs::OF_CRLF))
+    return ChangeStdoutToBinary();
+  return std::error_code();
+}
+
 std::error_code sys::ChangeStdinToBinary() {
   int result = _setmode(_fileno(stdin), _O_BINARY);
   if (result == -1)
@@ -506,7 +519,7 @@ std::error_code
 llvm::sys::writeFileWithEncoding(StringRef FileName, StringRef Contents,
                                  WindowsEncodingMethod Encoding) {
   std::error_code EC;
-  llvm::raw_fd_ostream OS(FileName, EC, llvm::sys::fs::OF_Text);
+  llvm::raw_fd_ostream OS(FileName, EC, llvm::sys::fs::OF_TextWithCRLF);
   if (EC)
     return EC;
 

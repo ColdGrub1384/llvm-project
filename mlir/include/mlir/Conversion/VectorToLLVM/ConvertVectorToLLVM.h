@@ -22,41 +22,40 @@ class OperationPass;
 /// ConvertVectorToLLVM pass in include/mlir/Conversion/Passes.td
 struct LowerVectorToLLVMOptions {
   LowerVectorToLLVMOptions()
-      : reassociateFPReductions(false), enableIndexOptimizations(true),
-        enableArmNeon(false), enableArmSVE(false), enableAMX(false),
-        enableAVX512(false) {}
+      : reassociateFPReductions(false), indexOptimizations(true),
+        armNeon(false), armSVE(false), amx(false), x86Vector(false) {}
 
-  LowerVectorToLLVMOptions &setReassociateFPReductions(bool b) {
+  LowerVectorToLLVMOptions &enableReassociateFPReductions(bool b = true) {
     reassociateFPReductions = b;
     return *this;
   }
-  LowerVectorToLLVMOptions &setEnableIndexOptimizations(bool b) {
-    enableIndexOptimizations = b;
+  LowerVectorToLLVMOptions &enableIndexOptimizations(bool b = true) {
+    indexOptimizations = b;
     return *this;
   }
-  LowerVectorToLLVMOptions &setEnableArmNeon(bool b) {
-    enableArmNeon = b;
+  LowerVectorToLLVMOptions &enableArmNeon(bool b = true) {
+    armNeon = b;
     return *this;
   }
-  LowerVectorToLLVMOptions &setEnableArmSVE(bool b) {
-    enableArmSVE = b;
+  LowerVectorToLLVMOptions &enableArmSVE(bool b = true) {
+    armSVE = b;
     return *this;
   }
-  LowerVectorToLLVMOptions &setEnableAMX(bool b) {
-    enableAMX = b;
+  LowerVectorToLLVMOptions &enableAMX(bool b = true) {
+    amx = b;
     return *this;
   }
-  LowerVectorToLLVMOptions &setEnableAVX512(bool b) {
-    enableAVX512 = b;
+  LowerVectorToLLVMOptions &enableX86Vector(bool b = true) {
+    x86Vector = b;
     return *this;
   }
 
   bool reassociateFPReductions;
-  bool enableIndexOptimizations;
-  bool enableArmNeon;
-  bool enableArmSVE;
-  bool enableAMX;
-  bool enableAVX512;
+  bool indexOptimizations;
+  bool armNeon;
+  bool armSVE;
+  bool amx;
+  bool x86Vector;
 };
 
 /// Collect a set of patterns to convert from Vector contractions to LLVM Matrix
@@ -68,7 +67,7 @@ void populateVectorToLLVMMatrixConversionPatterns(LLVMTypeConverter &converter,
 /// Collect a set of patterns to convert from the Vector dialect to LLVM.
 void populateVectorToLLVMConversionPatterns(
     LLVMTypeConverter &converter, RewritePatternSet &patterns,
-    bool reassociateFPReductions = false, bool enableIndexOptimizations = true);
+    bool reassociateFPReductions = false);
 
 /// Create a pass to convert vector operations to the LLVMIR dialect.
 std::unique_ptr<OperationPass<ModuleOp>> createConvertVectorToLLVMPass(

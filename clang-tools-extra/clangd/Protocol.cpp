@@ -70,6 +70,7 @@ bool fromJSON(const llvm::json::Value &E, URIForFile &R, llvm::json::Path P) {
   if (auto S = E.getAsString()) {
     auto Parsed = URI::parse(*S);
     if (!Parsed) {
+      consumeError(Parsed.takeError());
       P.report("failed to parse URI");
       return false;
     }
@@ -382,6 +383,13 @@ bool fromJSON(const llvm::json::Value &Params, ClientCapabilities &R,
           if (auto OffsetSupport = Parameter->getBoolean("labelOffsetSupport"))
             R.OffsetsInSignatureHelp = *OffsetSupport;
         }
+        if (const auto *DocumentationFormat =
+                Info->getArray("documentationFormat")) {
+          for (const auto &Format : *DocumentationFormat) {
+            if (fromJSON(Format, R.SignatureHelpDocumentationFormat, P))
+              break;
+          }
+        }
       }
     }
     if (auto *Rename = TextDocument->getObject("rename")) {
@@ -583,6 +591,8 @@ llvm::json::Value toJSON(const DiagnosticRelatedInformation &DRI) {
   };
 }
 
+llvm::json::Value toJSON(DiagnosticTag Tag) { return static_cast<int>(Tag); }
+
 llvm::json::Value toJSON(const Diagnostic &D) {
   llvm::json::Object Diag{
       {"range", D.range},
@@ -599,6 +609,10 @@ llvm::json::Value toJSON(const Diagnostic &D) {
     Diag["source"] = D.source;
   if (D.relatedInformation)
     Diag["relatedInformation"] = *D.relatedInformation;
+  if (!D.data.empty())
+    Diag["data"] = llvm::json::Object(D.data);
+  if (!D.tags.empty())
+    Diag["tags"] = llvm::json::Array{D.tags};
   // FIXME: workaround for older gcc/clang
   return std::move(Diag);
 }
@@ -606,7 +620,11 @@ llvm::json::Value toJSON(const Diagnostic &D) {
 bool fromJSON(const llvm::json::Value &Params, Diagnostic &R,
               llvm::json::Path P) {
   llvm::json::ObjectMapper O(Params, P);
-  return O && O.map("range", R.range) && O.map("message", R.message) &&
+  if (!O)
+    return false;
+  if (auto *Data = Params.getAsObject()->getObject("data"))
+    R.data = *Data;
+  return O.map("range", R.range) && O.map("message", R.message) &&
          mapOptOrNull(Params, "severity", R.severity, P) &&
          mapOptOrNull(Params, "category", R.category, P) &&
          mapOptOrNull(Params, "code", R.code, P) &&
@@ -684,7 +702,8 @@ bool fromJSON(const llvm::json::Value &Params, ExecuteCommandParams &R,
   if (ArgsArray->size() > 1) {
     P.field("arguments").report("Command should have 0 or 1 argument");
     return false;
-  } else if (ArgsArray->size() == 1) {
+  }
+  if (ArgsArray->size() == 1) {
     R.argument = ArgsArray->front();
   }
   return true;
@@ -801,10 +820,8 @@ llvm::json::Value toJSON(const DocumentSymbol &S) {
 }
 
 llvm::json::Value toJSON(const WorkspaceEdit &WE) {
-  if (!WE.changes)
-    return llvm::json::Object{};
   llvm::json::Object FileChanges;
-  for (auto &Change : *WE.changes)
+  for (auto &Change : WE.changes)
     FileChanges[Change.first] = llvm::json::Array(Change.second);
   return llvm::json::Object{{"changes", std::move(FileChanges)}};
 }
@@ -1021,7 +1038,7 @@ llvm::json::Value toJSON(const SignatureInformation &SI) {
       {"label", SI.label},
       {"parameters", llvm::json::Array(SI.parameters)},
   };
-  if (!SI.documentation.empty())
+  if (!SI.documentation.value.empty())
     Result["documentation"] = SI.documentation;
   return std::move(Result);
 }
@@ -1068,6 +1085,7 @@ llvm::json::Value toJSON(const FileStatus &FStatus) {
 constexpr unsigned SemanticTokenEncodingSize = 5;
 static llvm::json::Value encodeTokens(llvm::ArrayRef<SemanticToken> Toks) {
   llvm::json::Array Result;
+  Result.reserve(SemanticTokenEncodingSize * Toks.size());
   for (const auto &Tok : Toks) {
     Result.push_back(Tok.deltaLine);
     Result.push_back(Tok.deltaStart);
@@ -1294,6 +1312,37 @@ bool fromJSON(const llvm::json::Value &Params,
 
 llvm::json::Value toJSON(const CallHierarchyOutgoingCall &C) {
   return llvm::json::Object{{"to", C.to}, {"fromRanges", C.fromRanges}};
+}
+
+bool fromJSON(const llvm::json::Value &Params, InlayHintsParams &R,
+              llvm::json::Path P) {
+  llvm::json::ObjectMapper O(Params, P);
+  return O && O.map("textDocument", R.textDocument) && O.map("range", R.range);
+}
+
+llvm::json::Value toJSON(InlayHintKind K) {
+  switch (K) {
+  case InlayHintKind::ParameterHint:
+    return "parameter";
+  case InlayHintKind::TypeHint:
+    return "type";
+  }
+  llvm_unreachable("Unknown clang.clangd.InlayHintKind");
+}
+
+llvm::json::Value toJSON(const InlayHint &H) {
+  return llvm::json::Object{{"position", H.position},
+                            {"range", H.range},
+                            {"kind", H.kind},
+                            {"label", H.label}};
+}
+bool operator==(const InlayHint &A, const InlayHint &B) {
+  return std::tie(A.position, A.range, A.kind, A.label) ==
+         std::tie(B.position, B.range, B.kind, B.label);
+}
+bool operator<(const InlayHint &A, const InlayHint &B) {
+  return std::tie(A.position, A.range, A.kind, A.label) <
+         std::tie(B.position, B.range, B.kind, B.label);
 }
 
 static const char *toString(OffsetEncoding OE) {

@@ -67,6 +67,7 @@ Diagnostics:
     CheckOptions:
       IgnoreMacros: true
       example-check.ExampleOption: 0
+  UnusedIncludes: Strict
   )yaml";
   auto Results = Fragment::parseYAML(YAML, "config.yaml", Diags.callback());
   EXPECT_THAT(Diags.Diagnostics, IsEmpty());
@@ -83,6 +84,8 @@ Diagnostics:
   EXPECT_THAT(Results[3].Diagnostics.ClangTidy.CheckOptions,
               ElementsAre(PairVal("IgnoreMacros", "true"),
                           PairVal("example-check.ExampleOption", "0")));
+  EXPECT_TRUE(Results[3].Diagnostics.UnusedIncludes);
+  EXPECT_EQ("Strict", *Results[3].Diagnostics.UnusedIncludes.getValue());
 }
 
 TEST(ParseYAML, Locations) {
@@ -147,6 +150,23 @@ horrible
   ASSERT_THAT(Results, IsEmpty());
 }
 
+TEST(ParseYAML, ExternalBlockNone) {
+  CapturedDiags Diags;
+  Annotations YAML(R"yaml(
+Index:
+  External: None
+  )yaml");
+  auto Results =
+      Fragment::parseYAML(YAML.code(), "config.yaml", Diags.callback());
+  ASSERT_THAT(Diags.Diagnostics, IsEmpty());
+  ASSERT_EQ(Results.size(), 1u);
+  ASSERT_TRUE(Results[0].Index.External);
+  EXPECT_FALSE(Results[0].Index.External.getValue()->File.hasValue());
+  EXPECT_FALSE(Results[0].Index.External.getValue()->MountPoint.hasValue());
+  EXPECT_FALSE(Results[0].Index.External.getValue()->Server.hasValue());
+  EXPECT_THAT(*Results[0].Index.External.getValue()->IsNone, testing::Eq(true));
+}
+
 TEST(ParseYAML, ExternalBlock) {
   CapturedDiags Diags;
   Annotations YAML(R"yaml(
@@ -194,6 +214,19 @@ Completion:
                                 DiagRange(YAML.range("diagrange")))));
   ASSERT_EQ(Results.size(), 1u);
   EXPECT_THAT(Results[0].Completion.AllScopes, testing::Eq(llvm::None));
+}
+
+TEST(ParseYAML, ShowAKA) {
+  CapturedDiags Diags;
+  Annotations YAML(R"yaml(
+Hover:
+  ShowAKA: True
+  )yaml");
+  auto Results =
+      Fragment::parseYAML(YAML.code(), "config.yaml", Diags.callback());
+  ASSERT_THAT(Diags.Diagnostics, IsEmpty());
+  ASSERT_EQ(Results.size(), 1u);
+  EXPECT_THAT(Results[0].Hover.ShowAKA, llvm::ValueIs(Val(true)));
 }
 } // namespace
 } // namespace config

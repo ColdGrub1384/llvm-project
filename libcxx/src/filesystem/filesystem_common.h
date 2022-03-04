@@ -10,12 +10,14 @@
 #define FILESYSTEM_COMMON_H
 
 #include "__config"
-#include "filesystem"
 #include "array"
 #include "chrono"
 #include "climits"
+#include "cstdarg"
 #include "cstdlib"
 #include "ctime"
+#include "filesystem"
+#include "system_error"
 
 #if !defined(_LIBCPP_WIN32API)
 # include <unistd.h>
@@ -59,7 +61,7 @@ errc __win_err_to_errc(int err);
 
 namespace {
 
-static _LIBCPP_FORMAT_PRINTF(1, 0) string
+static _LIBCPP_ATTRIBUTE_FORMAT(__printf__, 1, 0) string
 format_string_impl(const char* msg, va_list ap) {
   array<char, 256> buf;
 
@@ -83,21 +85,21 @@ format_string_impl(const char* msg, va_list ap) {
   return result;
 }
 
-static _LIBCPP_FORMAT_PRINTF(1, 2) string
+static _LIBCPP_ATTRIBUTE_FORMAT(__printf__, 1, 2) string
 format_string(const char* msg, ...) {
   string ret;
   va_list ap;
   va_start(ap, msg);
 #ifndef _LIBCPP_NO_EXCEPTIONS
   try {
-#endif  // _LIBCPP_NO_EXCEPTIONS
+#endif // _LIBCPP_NO_EXCEPTIONS
     ret = format_string_impl(msg, ap);
 #ifndef _LIBCPP_NO_EXCEPTIONS
   } catch (...) {
     va_end(ap);
     throw;
   }
-#endif  // _LIBCPP_NO_EXCEPTIONS
+#endif // _LIBCPP_NO_EXCEPTIONS
   va_end(ap);
   return ret;
 }
@@ -171,7 +173,7 @@ struct ErrorHandler {
     _LIBCPP_UNREACHABLE();
   }
 
-  _LIBCPP_FORMAT_PRINTF(3, 0)
+  _LIBCPP_ATTRIBUTE_FORMAT(__printf__, 3, 0)
   void report_impl(const error_code& ec, const char* msg, va_list ap) const {
     if (ec_) {
       *ec_ = ec;
@@ -190,20 +192,20 @@ struct ErrorHandler {
     _LIBCPP_UNREACHABLE();
   }
 
-  _LIBCPP_FORMAT_PRINTF(3, 4)
+  _LIBCPP_ATTRIBUTE_FORMAT(__printf__, 3, 4)
   T report(const error_code& ec, const char* msg, ...) const {
     va_list ap;
     va_start(ap, msg);
 #ifndef _LIBCPP_NO_EXCEPTIONS
     try {
-#endif  // _LIBCPP_NO_EXCEPTIONS
+#endif // _LIBCPP_NO_EXCEPTIONS
       report_impl(ec, msg, ap);
 #ifndef _LIBCPP_NO_EXCEPTIONS
     } catch (...) {
       va_end(ap);
       throw;
     }
-#endif  // _LIBCPP_NO_EXCEPTIONS
+#endif // _LIBCPP_NO_EXCEPTIONS
     va_end(ap);
     return error_value<T>();
   }
@@ -212,20 +214,20 @@ struct ErrorHandler {
     return report(make_error_code(err));
   }
 
-  _LIBCPP_FORMAT_PRINTF(3, 4)
+  _LIBCPP_ATTRIBUTE_FORMAT(__printf__, 3, 4)
   T report(errc const& err, const char* msg, ...) const {
     va_list ap;
     va_start(ap, msg);
 #ifndef _LIBCPP_NO_EXCEPTIONS
     try {
-#endif  // _LIBCPP_NO_EXCEPTIONS
+#endif // _LIBCPP_NO_EXCEPTIONS
       report_impl(make_error_code(err), msg, ap);
 #ifndef _LIBCPP_NO_EXCEPTIONS
     } catch (...) {
       va_end(ap);
       throw;
     }
-#endif  // _LIBCPP_NO_EXCEPTIONS
+#endif // _LIBCPP_NO_EXCEPTIONS
     va_end(ap);
     return error_value<T>();
   }

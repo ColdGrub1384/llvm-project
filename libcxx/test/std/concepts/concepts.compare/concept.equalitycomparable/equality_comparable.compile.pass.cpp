@@ -20,14 +20,17 @@
 #include <list>
 #include <map>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
-#include "../types.h"
+#ifndef _LIBCPP_HAS_NO_THREADS
+#   include <mutex>
+#endif
+
+#include "compare_types.h"
 
 namespace fundamentals {
 static_assert(std::equality_comparable<int>);

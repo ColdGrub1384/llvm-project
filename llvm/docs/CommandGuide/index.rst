@@ -29,6 +29,7 @@ Basic Commands
    llvm-link
    llvm-lipo
    llvm-mca
+   llvm-otool
    llvm-profdata
    llvm-readobj
    llvm-stress
@@ -81,3 +82,4 @@ Developer Tools
    llvm-locstats
    llvm-pdbutil
    llvm-profgen
+   llvm-tli-checker

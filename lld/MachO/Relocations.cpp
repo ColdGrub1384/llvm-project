@@ -17,6 +17,9 @@ using namespace llvm;
 using namespace lld;
 using namespace lld::macho;
 
+static_assert(sizeof(void *) != 8 || sizeof(Reloc) == 24,
+              "Try to minimize Reloc's size; we create many instances");
+
 bool macho::validateSymbolRelocation(const Symbol *sym,
                                      const InputSection *isec, const Reloc &r) {
   const RelocAttrs &relocAttrs = target->getRelocAttrs(r.type);
@@ -31,10 +34,6 @@ bool macho::validateSymbolRelocation(const Symbol *sym,
   if (relocAttrs.hasAttr(RelocAttrBits::TLV) != sym->isTlv())
     error(message(Twine("requires that variable ") +
                   (sym->isTlv() ? "not " : "") + "be thread-local"));
-  if (relocAttrs.hasAttr(RelocAttrBits::DYSYM8) && isa<DylibSymbol>(sym) &&
-      r.length != 3)
-    error(message("has width " + std::to_string(1 << r.length) +
-                  " bytes, but must be 8 bytes"));
 
   return valid;
 }

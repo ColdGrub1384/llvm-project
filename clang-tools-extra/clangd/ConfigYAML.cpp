@@ -12,6 +12,7 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/YAMLParser.h"
+#include <string>
 #include <system_error>
 
 namespace clang {
@@ -64,6 +65,7 @@ public:
     Dict.handle("Style", [&](Node &N) { parse(F.Style, N); });
     Dict.handle("Diagnostics", [&](Node &N) { parse(F.Diagnostics, N); });
     Dict.handle("Completion", [&](Node &N) { parse(F.Completion, N); });
+    Dict.handle("Hover", [&](Node &N) { parse(F.Hover, N); });
     Dict.parse(N);
     return !(N.failed() || HadError);
   }
@@ -88,6 +90,10 @@ private:
 
   void parse(Fragment::CompileFlagsBlock &F, Node &N) {
     DictParser Dict("CompileFlags", this);
+    Dict.handle("Compiler", [&](Node &N) {
+      if (auto Value = scalarValue(N, "Compiler"))
+        F.Compiler = std::move(*Value);
+    });
     Dict.handle("Add", [&](Node &N) {
       if (auto Values = scalarValues(N))
         F.Add = std::move(*Values);
@@ -116,6 +122,9 @@ private:
     Dict.handle("Suppress", [&](Node &N) {
       if (auto Values = scalarValues(N))
         F.Suppress = std::move(*Values);
+    });
+    Dict.handle("UnusedIncludes", [&](Node &N) {
+      F.UnusedIncludes = scalarValue(N, "UnusedIncludes");
     });
     Dict.handle("ClangTidy", [&](Node &N) { parse(F.ClangTidy, N); });
     Dict.parse(N);
@@ -149,11 +158,32 @@ private:
                 [&](Node &N) { F.Background = scalarValue(N, "Background"); });
     Dict.handle("External", [&](Node &N) {
       Fragment::IndexBlock::ExternalBlock External;
-      parse(External, N);
+      // External block can either be a mapping or a scalar value. Dispatch
+      // accordingly.
+      if (N.getType() == Node::NK_Mapping) {
+        parse(External, N);
+      } else if (N.getType() == Node::NK_Scalar ||
+                 N.getType() == Node::NK_BlockScalar) {
+        parse(External, scalarValue(N, "External").getValue());
+      } else {
+        error("External must be either a scalar or a mapping.", N);
+        return;
+      }
       F.External.emplace(std::move(External));
       F.External->Range = N.getSourceRange();
     });
     Dict.parse(N);
+  }
+
+  void parse(Fragment::IndexBlock::ExternalBlock &F,
+             Located<std::string> ExternalVal) {
+    if (!llvm::StringRef(*ExternalVal).equals_insensitive("none")) {
+      error("Only scalar value supported for External is 'None'",
+            ExternalVal.Range);
+      return;
+    }
+    F.IsNone = true;
+    F.IsNone.Range = ExternalVal.Range;
   }
 
   void parse(Fragment::IndexBlock::ExternalBlock &F, Node &N) {
@@ -174,6 +204,19 @@ private:
           F.AllScopes = *AllScopes;
         else
           warning("AllScopes should be a boolean", N);
+      }
+    });
+    Dict.parse(N);
+  }
+
+  void parse(Fragment::HoverBlock &F, Node &N) {
+    DictParser Dict("Hover", this);
+    Dict.handle("ShowAKA", [&](Node &N) {
+      if (auto Value = scalarValue(N, "ShowAKA")) {
+        if (auto ShowAKA = llvm::yaml::parseBool(**Value))
+          F.ShowAKA = *ShowAKA;
+        else
+          warning("ShowAKA should be a boolean", N);
       }
     });
     Dict.parse(N);

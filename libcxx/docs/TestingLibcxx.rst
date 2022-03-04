@@ -126,7 +126,7 @@ default.
 
 .. option:: std=<standard version>
 
-  **Values**: c++03, c++11, c++14, c++17, c++2a, c++2b
+  **Values**: c++03, c++11, c++14, c++17, c++20, c++2b
 
   Change the standard version used when building the tests.
 
@@ -153,7 +153,7 @@ default.
   **Default**: False
 
   Enable or disable testing against the installed version of libc++ library.
-  This impacts whether the ``with_system_cxx_lib`` Lit feature is defined or
+  This impacts whether the ``use_system_cxx_lib`` Lit feature is defined or
   not. The ``cxx_library_root`` and ``cxx_runtime_root`` parameters should
   still be used to specify the path of the library to link to and run against,
   respectively.
@@ -227,12 +227,11 @@ An example build would look like:
 .. code-block:: bash
 
   $ cd build
-  $ cmake [options] <path to libcxx sources>
-  $ make cxx-benchmarks
+  $ ninja cxx-benchmarks
 
 This will build all of the benchmarks under ``<libcxx-src>/benchmarks`` to be
 built against the just-built libc++. The compiled tests are output into
-``build/benchmarks``.
+``build/projects/libcxx/benchmarks``.
 
 The benchmarks can also be built against the platforms native standard library
 using the ``-DLIBCXX_BUILD_BENCHMARKS_NATIVE_STDLIB=ON`` CMake option. This
@@ -255,8 +254,7 @@ For example:
 
 .. code-block:: bash
 
-  $ cd build/benchmarks
-  $ make cxx-benchmarks
+  $ cd build/projects/libcxx/benchmarks
   $ ./algorithms.libcxx.out # Runs all the benchmarks
   $ ./algorithms.libcxx.out --benchmark_filter=BM_Sort.* # Only runs the sort benchmarks
 

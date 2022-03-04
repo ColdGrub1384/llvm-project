@@ -1,4 +1,4 @@
-//===-- M68kRegisterInfo.cpp - CPU0 Register Information -----*- C++ -*--===//
+//===-- M68kRegisterInfo.cpp - CPU0 Register Information --------*- C++ -*-===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -10,8 +10,6 @@
 /// This file contains the CPU0 implementation of the TargetRegisterInfo class.
 ///
 //===----------------------------------------------------------------------===//
-
-#define DEBUG_TYPE "m68k-reg-info"
 
 #include "M68kRegisterInfo.h"
 
@@ -31,6 +29,8 @@
 
 #define GET_REGINFO_TARGET_DESC
 #include "M68kGenRegisterInfo.inc"
+
+#define DEBUG_TYPE "m68k-reg-info"
 
 using namespace llvm;
 
@@ -132,6 +132,12 @@ BitVector M68kRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
       Reserved.set(*I);
     }
   };
+
+  // Registers reserved by users
+  for (size_t Reg = 0, Total = getNumRegs(); Reg != Total; ++Reg) {
+    if (MF.getSubtarget<M68kSubtarget>().isRegisterReservedByUser(Reg))
+      setBitVector(Reg);
+  }
 
   setBitVector(M68k::PC);
   setBitVector(M68k::SP);

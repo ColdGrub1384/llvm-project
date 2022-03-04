@@ -877,7 +877,6 @@ static void pdb2Yaml(StringRef Path) {
   auto &File = loadPDB(Path, Session);
 
   auto O = std::make_unique<YAMLOutputStyle>(File);
-  O = std::make_unique<YAMLOutputStyle>(File);
 
   ExitOnErr(O->dump());
 }
@@ -1440,6 +1439,8 @@ int main(int Argc, const char **Argv) {
   InitLLVM X(Argc, Argv);
   ExitOnErr.setBanner("llvm-pdbutil: ");
 
+  cl::HideUnrelatedOptions(
+      {&opts::TypeCategory, &opts::FilterCategory, &opts::OtherOptions});
   cl::ParseCommandLineOptions(Argc, Argv, "LLVM PDB Dumper\n");
 
   if (opts::BytesSubcommand) {

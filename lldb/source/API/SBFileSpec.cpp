@@ -17,8 +17,8 @@
 
 #include "llvm/ADT/SmallString.h"
 
-#include <inttypes.h>
-#include <limits.h>
+#include <cinttypes>
+#include <climits>
 
 using namespace lldb;
 using namespace lldb_private;
@@ -27,7 +27,7 @@ SBFileSpec::SBFileSpec() : m_opaque_up(new lldb_private::FileSpec()) {
   LLDB_RECORD_CONSTRUCTOR_NO_ARGS(SBFileSpec);
 }
 
-SBFileSpec::SBFileSpec(const SBFileSpec &rhs) : m_opaque_up() {
+SBFileSpec::SBFileSpec(const SBFileSpec &rhs) {
   LLDB_RECORD_CONSTRUCTOR(SBFileSpec, (const lldb::SBFileSpec &), rhs);
 
   m_opaque_up = clone(rhs.m_opaque_up);

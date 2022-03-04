@@ -32,8 +32,10 @@ extern cl::opt<unsigned> SCEVCheapExpansionBudget;
 
 /// Return true if the given expression is safe to expand in the sense that
 /// all materialized values are safe to speculate anywhere their operands are
-/// defined.
-bool isSafeToExpand(const SCEV *S, ScalarEvolution &SE);
+/// defined, and the expander is capable of expanding the expression.
+/// CanonicalMode indicates whether the expander will be used in canonical mode.
+bool isSafeToExpand(const SCEV *S, ScalarEvolution &SE,
+                    bool CanonicalMode = true);
 
 /// Return true if the given expression is safe to expand in the sense that
 /// all materialized values are defined and safe to speculate at the specified
@@ -82,6 +84,9 @@ class SCEVExpander : public SCEVVisitor<SCEVExpander, Value *> {
   /// FIXME: Ideally re-used instructions would not be added to
   /// InsertedValues/InsertedPostIncValues.
   SmallPtrSet<Value *, 16> ReusedValues;
+
+  // The induction variables generated.
+  SmallVector<WeakVH, 2> InsertedIVs;
 
   /// A memoization of the "relevant" loop for a given SCEV.
   DenseMap<const SCEV *, const Loop *> RelevantLoops;
@@ -160,7 +165,7 @@ class SCEVExpander : public SCEVVisitor<SCEVExpander, Value *> {
   /// consistent when instructions are moved.
   SmallVector<SCEVInsertPointGuard *, 8> InsertPointGuards;
 
-#ifndef NDEBUG
+#ifdef LLVM_ENABLE_ABI_BREAKING_CHECKS
   const char *DebugType;
 #endif
 
@@ -176,7 +181,7 @@ public:
         Builder(se.getContext(), TargetFolder(DL),
                 IRBuilderCallbackInserter(
                     [this](Instruction *I) { rememberInstruction(I); })) {
-#ifndef NDEBUG
+#ifdef LLVM_ENABLE_ABI_BREAKING_CHECKS
     DebugType = "";
 #endif
   }
@@ -186,7 +191,7 @@ public:
     assert(InsertPointGuards.empty());
   }
 
-#ifndef NDEBUG
+#ifdef LLVM_ENABLE_ABI_BREAKING_CHECKS
   void setDebugType(const char *s) { DebugType = s; }
 #endif
 
@@ -199,9 +204,11 @@ public:
     InsertedPostIncValues.clear();
     ReusedValues.clear();
     ChainedPhis.clear();
+    InsertedIVs.clear();
   }
 
   ScalarEvolution *getSE() { return &SE; }
+  const SmallVectorImpl<WeakVH> &getInsertedIVs() const { return InsertedIVs; }
 
   /// Return a vector containing all instructions inserted during expansion.
   SmallVector<Instruction *, 32> getAllInsertedInstructions() const {
@@ -382,7 +389,7 @@ public:
   /// Returns a suitable insert point after \p I, that dominates \p
   /// MustDominate. Skips instructions inserted by the expander.
   BasicBlock::iterator findInsertPointAfter(Instruction *I,
-                                            Instruction *MustDominate);
+                                            Instruction *MustDominate) const;
 
 private:
   LLVMContext &getContext() const { return SE.getContext(); }
@@ -414,6 +421,9 @@ private:
   /// outer loop when the opportunity is there and it is safe.
   Value *InsertBinop(Instruction::BinaryOps Opcode, Value *LHS, Value *RHS,
                      SCEV::NoWrapFlags Flags, bool IsSafeToHoist);
+
+  /// We want to cast \p V. What would be the best place for such a cast?
+  BasicBlock::iterator GetOptimalInsertionPointForCastOf(Value *V) const;
 
   /// Arrange for there to be a cast of V to Ty at IP, reusing an existing
   /// cast if a suitable one exists, moving an existing cast if a suitable one
@@ -480,9 +490,6 @@ private:
                                      Type *&TruncTy, bool &InvertStep);
   Value *expandIVInc(PHINode *PN, Value *StepV, const Loop *L, Type *ExpandTy,
                      Type *IntTy, bool useSubtract);
-
-  void hoistBeforePos(DominatorTree *DT, Instruction *InstToHoist,
-                      Instruction *Pos, PHINode *LoopPhi);
 
   void fixupInsertPoints(Instruction *I);
 

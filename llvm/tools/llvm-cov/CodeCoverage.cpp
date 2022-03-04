@@ -183,8 +183,8 @@ private:
   std::vector<std::pair<std::string, std::unique_ptr<MemoryBuffer>>>
       LoadedSourceFiles;
 
-  /// Whitelist from -name-whitelist to be used for filtering.
-  std::unique_ptr<SpecialCaseList> NameWhitelist;
+  /// Allowlist from -name-allowlist to be used for filtering.
+  std::unique_ptr<SpecialCaseList> NameAllowlist;
 };
 }
 
@@ -216,7 +216,7 @@ void CodeCoverageTool::addCollectedPath(const std::string &Path) {
     error(EC.message(), Path);
     return;
   }
-  sys::path::remove_dots(EffectivePath, /*remove_dot_dots=*/true);
+  sys::path::remove_dots(EffectivePath, /*remove_dot_dot=*/true);
   if (!IgnoreFilenameFilters.matchesFilename(EffectivePath))
     SourceFiles.emplace_back(EffectivePath.str());
   HadSourceFiles = !SourceFiles.empty();
@@ -441,7 +441,8 @@ std::unique_ptr<CoverageMapping> CodeCoverageTool::load() {
       warning("profile data may be out of date - object is newer",
               ObjectFilename);
   auto CoverageOrErr =
-      CoverageMapping::load(ObjectFilenames, PGOFilename, CoverageArches);
+      CoverageMapping::load(ObjectFilenames, PGOFilename, CoverageArches,
+                            ViewOpts.CompilationDirectory);
   if (Error E = CoverageOrErr.takeError()) {
     error("Failed to load coverage: " + toString(std::move(E)),
           join(ObjectFilenames.begin(), ObjectFilenames.end(), ", "));
@@ -674,9 +675,16 @@ int CodeCoverageTool::run(Command Cmd, int argc, const char **argv) {
       cl::ZeroOrMore, cl::cat(FilteringCategory));
 
   cl::list<std::string> NameFilterFiles(
-      "name-whitelist", cl::Optional,
+      "name-allowlist", cl::Optional,
       cl::desc("Show code coverage only for functions listed in the given "
                "file"),
+      cl::ZeroOrMore, cl::cat(FilteringCategory));
+
+  // Allow for accepting previous option name.
+  cl::list<std::string> NameFilterFilesDeprecated(
+      "name-whitelist", cl::Optional, cl::Hidden,
+      cl::desc("Show code coverage only for functions listed in the given "
+               "file. Deprecated, use -name-allowlist instead"),
       cl::ZeroOrMore, cl::cat(FilteringCategory));
 
   cl::list<std::string> NameRegexFilters(
@@ -746,6 +754,10 @@ int CodeCoverageTool::run(Command Cmd, int argc, const char **argv) {
   cl::alias NumThreadsA("j", cl::desc("Alias for --num-threads"),
                         cl::aliasopt(NumThreads));
 
+  cl::opt<std::string> CompilationDirectory(
+      "compilation-dir", cl::init(""),
+      cl::desc("Directory used as a base for relative coverage mapping paths"));
+
   auto commandLineParser = [&, this](int argc, const char **argv) -> int {
     cl::ParseCommandLineOptions(argc, argv, "LLVM code coverage tool\n");
     ViewOpts.Debug = DebugDump;
@@ -786,10 +798,18 @@ int CodeCoverageTool::run(Command Cmd, int argc, const char **argv) {
 
     // If path-equivalence was given and is a comma seperated pair then set
     // PathRemapping.
-    auto EquivPair = StringRef(PathRemap).split(',');
-    if (!(EquivPair.first.empty() && EquivPair.second.empty()))
+    if (!PathRemap.empty()) {
+      auto EquivPair = StringRef(PathRemap).split(',');
+      if (EquivPair.first.empty() || EquivPair.second.empty()) {
+        error("invalid argument '" + PathRemap +
+                  "', must be in format 'from,to'",
+              "-path-equivalence");
+        return 1;
+      }
+
       PathRemapping = {std::string(EquivPair.first),
                        std::string(EquivPair.second)};
+    }
 
     // If a demangler is supplied, check if it exists and register it.
     if (!DemanglerOpts.empty()) {
@@ -803,23 +823,34 @@ int CodeCoverageTool::run(Command Cmd, int argc, const char **argv) {
       ViewOpts.DemanglerOpts.swap(DemanglerOpts);
     }
 
-    // Read in -name-whitelist files.
-    if (!NameFilterFiles.empty()) {
+    // Read in -name-allowlist files.
+    if (!NameFilterFiles.empty() || !NameFilterFilesDeprecated.empty()) {
       std::string SpecialCaseListErr;
-      NameWhitelist = SpecialCaseList::create(
-          NameFilterFiles, *vfs::getRealFileSystem(), SpecialCaseListErr);
-      if (!NameWhitelist)
+      if (!NameFilterFiles.empty())
+        NameAllowlist = SpecialCaseList::create(
+            NameFilterFiles, *vfs::getRealFileSystem(), SpecialCaseListErr);
+      if (!NameFilterFilesDeprecated.empty())
+        NameAllowlist = SpecialCaseList::create(NameFilterFilesDeprecated,
+                                                *vfs::getRealFileSystem(),
+                                                SpecialCaseListErr);
+
+      if (!NameAllowlist)
         error(SpecialCaseListErr);
     }
 
     // Create the function filters
-    if (!NameFilters.empty() || NameWhitelist || !NameRegexFilters.empty()) {
+    if (!NameFilters.empty() || NameAllowlist || !NameRegexFilters.empty()) {
       auto NameFilterer = std::make_unique<CoverageFilters>();
       for (const auto &Name : NameFilters)
         NameFilterer->push_back(std::make_unique<NameCoverageFilter>(Name));
-      if (NameWhitelist)
-        NameFilterer->push_back(
-            std::make_unique<NameWhitelistCoverageFilter>(*NameWhitelist));
+      if (NameAllowlist) {
+        if (!NameFilterFiles.empty())
+          NameFilterer->push_back(
+              std::make_unique<NameAllowlistCoverageFilter>(*NameAllowlist));
+        if (!NameFilterFilesDeprecated.empty())
+          NameFilterer->push_back(
+              std::make_unique<NameWhitelistCoverageFilter>(*NameAllowlist));
+      }
       for (const auto &Regex : NameRegexFilters)
         NameFilterer->push_back(
             std::make_unique<NameRegexCoverageFilter>(Regex));
@@ -880,6 +911,7 @@ int CodeCoverageTool::run(Command Cmd, int argc, const char **argv) {
     ViewOpts.ShowInstantiationSummary = InstantiationSummary;
     ViewOpts.ExportSummaryOnly = SummaryOnly;
     ViewOpts.NumThreads = NumThreads;
+    ViewOpts.CompilationDirectory = CompilationDirectory;
 
     return 0;
   };

@@ -111,7 +111,7 @@ compound=true
     N1 -> N2 [ label=""]
     N2 [label =
       "for.body:\l" +
-      "  WIDEN-PHI %indvars.iv = phi 0, %indvars.iv.next\l" +
+      "  WIDEN-PHI ir\<%indvars.iv\> = phi ir\<0\>, ir\<%indvars.iv.next\>\l" +
       "  EMIT ir\<%arr.idx\> = getelementptr ir\<%A\> ir\<%indvars.iv\>\l" +
       "  EMIT ir\<%l1\> = load ir\<%arr.idx\>\l" +
       "  EMIT ir\<%res\> = add ir\<%l1\> ir\<10\>\l" +
@@ -134,10 +134,10 @@ compound=true
   EXPECT_EQ(ExpectedStr, FullDump);
 #endif
 
-  LoopVectorizationLegality::InductionList Inductions;
   SmallPtrSet<Instruction *, 1> DeadInstructions;
-  VPlanTransforms::VPInstructionsToVPRecipes(LI->getLoopFor(LoopHeader), Plan,
-                                             Inductions, DeadInstructions, *SE);
+  VPlanTransforms::VPInstructionsToVPRecipes(
+      LI->getLoopFor(LoopHeader), Plan, [](PHINode *P) { return nullptr; },
+      DeadInstructions, *SE);
 }
 
 TEST_F(VPlanHCFGTest, testVPInstructionToVPRecipesInner) {
@@ -164,10 +164,10 @@ TEST_F(VPlanHCFGTest, testVPInstructionToVPRecipesInner) {
   BasicBlock *LoopHeader = F->getEntryBlock().getSingleSuccessor();
   auto Plan = buildHCFG(LoopHeader);
 
-  LoopVectorizationLegality::InductionList Inductions;
   SmallPtrSet<Instruction *, 1> DeadInstructions;
-  VPlanTransforms::VPInstructionsToVPRecipes(LI->getLoopFor(LoopHeader), Plan,
-                                             Inductions, DeadInstructions, *SE);
+  VPlanTransforms::VPInstructionsToVPRecipes(
+      LI->getLoopFor(LoopHeader), Plan, [](PHINode *P) { return nullptr; },
+      DeadInstructions, *SE);
 
   VPBlockBase *Entry = Plan->getEntry()->getEntryBasicBlock();
   EXPECT_NE(nullptr, Entry->getSingleSuccessor());

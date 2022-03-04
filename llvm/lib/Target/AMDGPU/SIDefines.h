@@ -7,12 +7,20 @@
 /// \file
 //===----------------------------------------------------------------------===//
 
-#include "llvm/MC/MCInstrDesc.h"
-
 #ifndef LLVM_LIB_TARGET_AMDGPU_SIDEFINES_H
 #define LLVM_LIB_TARGET_AMDGPU_SIDEFINES_H
 
+#include "llvm/MC/MCInstrDesc.h"
+
 namespace llvm {
+
+// This needs to be kept in sync with the field bits in SIRegisterClass.
+enum SIRCFlags : uint8_t {
+  // For vector registers.
+  HasVGPR = 1 << 0,
+  HasAGPR = 1 << 1,
+  HasSGPR = 1 << 2
+}; // enum SIRCFlags
 
 namespace SIInstrFlags {
 // This needs to be kept in sync with the field bits in InstSI.
@@ -91,7 +99,7 @@ enum : uint64_t {
   D16Buf = UINT64_C(1) << 50,
 
   // FLAT instruction accesses FLAT_GLBL segment.
-  IsFlatGlobal = UINT64_C(1) << 51,
+  FlatGlobal = UINT64_C(1) << 51,
 
   // Uses floating point double precision rounding mode
   FPDPRounding = UINT64_C(1) << 52,
@@ -106,7 +114,7 @@ enum : uint64_t {
   IsDOT = UINT64_C(1) << 55,
 
   // FLAT instruction accesses FLAT_SCRATCH segment.
-  IsFlatScratch = UINT64_C(1) << 56,
+  FlatScratch = UINT64_C(1) << 56,
 
   // Atomic without return.
   IsAtomicNoRet = UINT64_C(1) << 57,
@@ -132,64 +140,67 @@ enum ClassFlags : unsigned {
 }
 
 namespace AMDGPU {
-  enum OperandType : unsigned {
-    /// Operands with register or 32-bit immediate
-    OPERAND_REG_IMM_INT32 = MCOI::OPERAND_FIRST_TARGET,
-    OPERAND_REG_IMM_INT64,
-    OPERAND_REG_IMM_INT16,
-    OPERAND_REG_IMM_FP32,
-    OPERAND_REG_IMM_FP64,
-    OPERAND_REG_IMM_FP16,
-    OPERAND_REG_IMM_V2FP16,
-    OPERAND_REG_IMM_V2INT16,
-    OPERAND_REG_IMM_V2INT32,
-    OPERAND_REG_IMM_V2FP32,
+enum OperandType : unsigned {
+  /// Operands with register or 32-bit immediate
+  OPERAND_REG_IMM_INT32 = MCOI::OPERAND_FIRST_TARGET,
+  OPERAND_REG_IMM_INT64,
+  OPERAND_REG_IMM_INT16,
+  OPERAND_REG_IMM_FP32,
+  OPERAND_REG_IMM_FP64,
+  OPERAND_REG_IMM_FP16,
+  OPERAND_REG_IMM_FP16_DEFERRED,
+  OPERAND_REG_IMM_FP32_DEFERRED,
+  OPERAND_REG_IMM_V2FP16,
+  OPERAND_REG_IMM_V2INT16,
+  OPERAND_REG_IMM_V2INT32,
+  OPERAND_REG_IMM_V2FP32,
 
-    /// Operands with register or inline constant
-    OPERAND_REG_INLINE_C_INT16,
-    OPERAND_REG_INLINE_C_INT32,
-    OPERAND_REG_INLINE_C_INT64,
-    OPERAND_REG_INLINE_C_FP16,
-    OPERAND_REG_INLINE_C_FP32,
-    OPERAND_REG_INLINE_C_FP64,
-    OPERAND_REG_INLINE_C_V2INT16,
-    OPERAND_REG_INLINE_C_V2FP16,
-    OPERAND_REG_INLINE_C_V2INT32,
-    OPERAND_REG_INLINE_C_V2FP32,
+  /// Operands with register or inline constant
+  OPERAND_REG_INLINE_C_INT16,
+  OPERAND_REG_INLINE_C_INT32,
+  OPERAND_REG_INLINE_C_INT64,
+  OPERAND_REG_INLINE_C_FP16,
+  OPERAND_REG_INLINE_C_FP32,
+  OPERAND_REG_INLINE_C_FP64,
+  OPERAND_REG_INLINE_C_V2INT16,
+  OPERAND_REG_INLINE_C_V2FP16,
+  OPERAND_REG_INLINE_C_V2INT32,
+  OPERAND_REG_INLINE_C_V2FP32,
 
-    /// Operands with an AccVGPR register or inline constant
-    OPERAND_REG_INLINE_AC_INT16,
-    OPERAND_REG_INLINE_AC_INT32,
-    OPERAND_REG_INLINE_AC_FP16,
-    OPERAND_REG_INLINE_AC_FP32,
-    OPERAND_REG_INLINE_AC_FP64,
-    OPERAND_REG_INLINE_AC_V2INT16,
-    OPERAND_REG_INLINE_AC_V2FP16,
-    OPERAND_REG_INLINE_AC_V2INT32,
-    OPERAND_REG_INLINE_AC_V2FP32,
+  /// Operand with 32-bit immediate that uses the constant bus.
+  OPERAND_KIMM32,
+  OPERAND_KIMM16,
 
-    OPERAND_REG_IMM_FIRST = OPERAND_REG_IMM_INT32,
-    OPERAND_REG_IMM_LAST = OPERAND_REG_IMM_V2FP32,
+  /// Operands with an AccVGPR register or inline constant
+  OPERAND_REG_INLINE_AC_INT16,
+  OPERAND_REG_INLINE_AC_INT32,
+  OPERAND_REG_INLINE_AC_FP16,
+  OPERAND_REG_INLINE_AC_FP32,
+  OPERAND_REG_INLINE_AC_FP64,
+  OPERAND_REG_INLINE_AC_V2INT16,
+  OPERAND_REG_INLINE_AC_V2FP16,
+  OPERAND_REG_INLINE_AC_V2INT32,
+  OPERAND_REG_INLINE_AC_V2FP32,
 
-    OPERAND_REG_INLINE_C_FIRST = OPERAND_REG_INLINE_C_INT16,
-    OPERAND_REG_INLINE_C_LAST = OPERAND_REG_INLINE_AC_V2FP32,
+  OPERAND_REG_IMM_FIRST = OPERAND_REG_IMM_INT32,
+  OPERAND_REG_IMM_LAST = OPERAND_REG_IMM_V2FP32,
 
-    OPERAND_REG_INLINE_AC_FIRST = OPERAND_REG_INLINE_AC_INT16,
-    OPERAND_REG_INLINE_AC_LAST = OPERAND_REG_INLINE_AC_V2FP32,
+  OPERAND_REG_INLINE_C_FIRST = OPERAND_REG_INLINE_C_INT16,
+  OPERAND_REG_INLINE_C_LAST = OPERAND_REG_INLINE_AC_V2FP32,
 
-    OPERAND_SRC_FIRST = OPERAND_REG_IMM_INT32,
-    OPERAND_SRC_LAST = OPERAND_REG_INLINE_C_LAST,
+  OPERAND_REG_INLINE_AC_FIRST = OPERAND_REG_INLINE_AC_INT16,
+  OPERAND_REG_INLINE_AC_LAST = OPERAND_REG_INLINE_AC_V2FP32,
 
-    // Operand for source modifiers for VOP instructions
-    OPERAND_INPUT_MODS,
+  OPERAND_SRC_FIRST = OPERAND_REG_IMM_INT32,
+  OPERAND_SRC_LAST = OPERAND_REG_INLINE_C_LAST,
 
-    // Operand for SDWA instructions
-    OPERAND_SDWA_VOPC_DST,
+  // Operand for source modifiers for VOP instructions
+  OPERAND_INPUT_MODS,
 
-    /// Operand with 32-bit immediate that uses the constant bus.
-    OPERAND_KIMM32,
-    OPERAND_KIMM16
-  };
+  // Operand for SDWA instructions
+  OPERAND_SDWA_VOPC_DST
+
+};
 }
 
 // Input operand modifiers bit-masks

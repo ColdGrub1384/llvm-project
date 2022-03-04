@@ -26,6 +26,7 @@
 #include "lldb/API/SBStringList.h"
 #include "lldb/API/SBStructuredData.h"
 #include "lldb/API/SBSymbolContextList.h"
+#include "lldb/API/SBTrace.h"
 #include "lldb/Breakpoint/BreakpointID.h"
 #include "lldb/Breakpoint/BreakpointIDList.h"
 #include "lldb/Breakpoint/BreakpointList.h"
@@ -72,9 +73,7 @@ using namespace lldb_private;
 
 #define DEFAULT_DISASM_BYTE_SIZE 32
 
-namespace {
-
-Status AttachToProcess(ProcessAttachInfo &attach_info, Target &target) {
+static Status AttachToProcess(ProcessAttachInfo &attach_info, Target &target) {
   std::lock_guard<std::recursive_mutex> guard(target.GetAPIMutex());
 
   auto process_sp = target.GetProcessSP();
@@ -93,12 +92,8 @@ Status AttachToProcess(ProcessAttachInfo &attach_info, Target &target) {
   return target.Attach(attach_info, nullptr);
 }
 
-} // namespace
-
 // SBTarget constructor
-SBTarget::SBTarget() : m_opaque_sp() {
-  LLDB_RECORD_CONSTRUCTOR_NO_ARGS(SBTarget);
-}
+SBTarget::SBTarget() { LLDB_RECORD_CONSTRUCTOR_NO_ARGS(SBTarget); }
 
 SBTarget::SBTarget(const SBTarget &rhs) : m_opaque_sp(rhs.m_opaque_sp) {
   LLDB_RECORD_CONSTRUCTOR(SBTarget, (const lldb::SBTarget &), rhs);
@@ -216,17 +211,11 @@ SBStructuredData SBTarget::GetStatistics() {
   TargetSP target_sp(GetSP());
   if (!target_sp)
     return LLDB_RECORD_RESULT(data);
-
-  auto stats_up = std::make_unique<StructuredData::Dictionary>();
-  int i = 0;
-  for (auto &Entry : target_sp->GetStatistics()) {
-    std::string Desc = lldb_private::GetStatDescription(
-        static_cast<lldb_private::StatisticKind>(i));
-    stats_up->AddIntegerItem(Desc, Entry);
-    i += 1;
-  }
-
-  data.m_impl_up->SetObjectSP(std::move(stats_up));
+  std::string json_str =
+      llvm::formatv("{0:2}",
+          DebuggerStats::ReportStatistics(target_sp->GetDebugger(),
+                                          target_sp.get())).str();
+  data.m_impl_up->SetObjectSP(StructuredData::ParseJSON(json_str));
   return LLDB_RECORD_RESULT(data);
 }
 
@@ -236,7 +225,7 @@ void SBTarget::SetCollectingStats(bool v) {
   TargetSP target_sp(GetSP());
   if (!target_sp)
     return;
-  return target_sp->SetCollectingStats(v);
+  return DebuggerStats::SetCollectingStats(v);
 }
 
 bool SBTarget::GetCollectingStats() {
@@ -245,7 +234,7 @@ bool SBTarget::GetCollectingStats() {
   TargetSP target_sp(GetSP());
   if (!target_sp)
     return false;
-  return target_sp->GetCollectingStats();
+  return DebuggerStats::GetCollectingStats();
 }
 
 SBProcess SBTarget::LoadCore(const char *core_file) {
@@ -705,7 +694,7 @@ size_t SBTarget::ReadMemory(const SBAddress addr, void *buf, size_t size,
   if (target_sp) {
     std::lock_guard<std::recursive_mutex> guard(target_sp->GetAPIMutex());
     bytes_read =
-        target_sp->ReadMemory(addr.ref(), false, buf, size, sb_error.ref());
+        target_sp->ReadMemory(addr.ref(), buf, size, sb_error.ref(), true);
   } else {
     sb_error.SetErrorString("invalid target");
   }
@@ -1595,13 +1584,13 @@ void SBTarget::AppendImageSearchPath(const char *from, const char *to,
   if (!target_sp)
     return error.SetErrorString("invalid target");
 
-  const ConstString csFrom(from), csTo(to);
-  if (!csFrom)
+  llvm::StringRef srFrom = from, srTo = to;
+  if (srFrom.empty())
     return error.SetErrorString("<from> path can't be empty");
-  if (!csTo)
+  if (srTo.empty())
     return error.SetErrorString("<to> path can't be empty");
 
-  target_sp->GetImageSearchPathList().Append(csFrom, csTo, true);
+  target_sp->GetImageSearchPathList().Append(srFrom, srTo, true);
 }
 
 lldb::SBModule SBTarget::AddModule(const char *path, const char *triple,
@@ -1754,6 +1743,16 @@ uint32_t SBTarget::GetCodeByteSize() {
   return 0;
 }
 
+uint32_t SBTarget::GetMaximumNumberOfChildrenToDisplay() const {
+  LLDB_RECORD_METHOD_CONST_NO_ARGS(uint32_t, SBTarget, GetMaximumNumberOfChildrenToDisplay);
+
+  TargetSP target_sp(GetSP());
+  if(target_sp){
+     return target_sp->GetMaximumNumberOfChildrenToDisplay();
+  }
+  return 0;
+}
+
 uint32_t SBTarget::GetAddressByteSize() {
   LLDB_RECORD_METHOD_NO_ARGS(uint32_t, SBTarget, GetAddressByteSize);
 
@@ -1830,11 +1829,13 @@ lldb::SBSymbolContextList SBTarget::FindFunctions(const char *name,
   if (!target_sp)
     return LLDB_RECORD_RESULT(sb_sc_list);
 
-  const bool symbols_ok = true;
-  const bool inlines_ok = true;
+  ModuleFunctionSearchOptions function_options;
+  function_options.include_symbols = true;
+  function_options.include_inlines = true;
+
   FunctionNameType mask = static_cast<FunctionNameType>(name_type_mask);
-  target_sp->GetImages().FindFunctions(ConstString(name), mask, symbols_ok,
-                                       inlines_ok, *sb_sc_list);
+  target_sp->GetImages().FindFunctions(ConstString(name), mask,
+                                       function_options, *sb_sc_list);
   return LLDB_RECORD_RESULT(sb_sc_list);
 }
 
@@ -1850,20 +1851,25 @@ lldb::SBSymbolContextList SBTarget::FindGlobalFunctions(const char *name,
     llvm::StringRef name_ref(name);
     TargetSP target_sp(GetSP());
     if (target_sp) {
+      ModuleFunctionSearchOptions function_options;
+      function_options.include_symbols = true;
+      function_options.include_inlines = true;
+
       std::string regexstr;
       switch (matchtype) {
       case eMatchTypeRegex:
-        target_sp->GetImages().FindFunctions(RegularExpression(name_ref), true,
-                                             true, *sb_sc_list);
+        target_sp->GetImages().FindFunctions(RegularExpression(name_ref),
+                                             function_options, *sb_sc_list);
         break;
       case eMatchTypeStartsWith:
         regexstr = llvm::Regex::escape(name) + ".*";
-        target_sp->GetImages().FindFunctions(RegularExpression(regexstr), true,
-                                             true, *sb_sc_list);
+        target_sp->GetImages().FindFunctions(RegularExpression(regexstr),
+                                             function_options, *sb_sc_list);
         break;
       default:
-        target_sp->GetImages().FindFunctions(
-            ConstString(name), eFunctionNameTypeAny, true, true, *sb_sc_list);
+        target_sp->GetImages().FindFunctions(ConstString(name),
+                                             eFunctionNameTypeAny,
+                                             function_options, *sb_sc_list);
         break;
       }
     }
@@ -2085,12 +2091,12 @@ lldb::SBInstructionList SBTarget::ReadInstructions(lldb::SBAddress base_addr,
     if (addr_ptr) {
       DataBufferHeap data(
           target_sp->GetArchitecture().GetMaximumOpcodeByteSize() * count, 0);
-      bool prefer_file_cache = false;
+      bool force_live_memory = true;
       lldb_private::Status error;
       lldb::addr_t load_addr = LLDB_INVALID_ADDRESS;
       const size_t bytes_read =
-          target_sp->ReadMemory(*addr_ptr, prefer_file_cache, data.GetBytes(),
-                                data.GetByteSize(), error, &load_addr);
+          target_sp->ReadMemory(*addr_ptr, data.GetBytes(), data.GetByteSize(),
+                                error, force_live_memory, &load_addr);
       const bool data_from_file = load_addr == LLDB_INVALID_ADDRESS;
       sb_instructions.SetDisassembler(Disassembler::DisassembleBytes(
           target_sp->GetArchitecture(), nullptr, flavor_string, *addr_ptr,
@@ -2454,6 +2460,34 @@ SBEnvironment SBTarget::GetEnvironment() {
   return LLDB_RECORD_RESULT(SBEnvironment());
 }
 
+lldb::SBTrace SBTarget::GetTrace() {
+  LLDB_RECORD_METHOD_NO_ARGS(lldb::SBTrace, SBTarget, GetTrace);
+  TargetSP target_sp(GetSP());
+
+  if (target_sp)
+    return LLDB_RECORD_RESULT(SBTrace(target_sp->GetTrace()));
+
+  return LLDB_RECORD_RESULT(SBTrace());
+}
+
+lldb::SBTrace SBTarget::CreateTrace(lldb::SBError &error) {
+  LLDB_RECORD_METHOD(lldb::SBTrace, SBTarget, CreateTrace, (lldb::SBError &),
+                     error);
+  TargetSP target_sp(GetSP());
+  error.Clear();
+
+  if (target_sp) {
+    if (llvm::Expected<lldb::TraceSP> trace_sp = target_sp->CreateTrace()) {
+      return LLDB_RECORD_RESULT(SBTrace(*trace_sp));
+    } else {
+      error.SetErrorString(llvm::toString(trace_sp.takeError()).c_str());
+    }
+  } else {
+    error.SetErrorString("missing target");
+  }
+  return LLDB_RECORD_RESULT(SBTrace());
+}
+
 namespace lldb_private {
 namespace repro {
 
@@ -2653,6 +2687,7 @@ void RegisterMethods<SBTarget>(Registry &R) {
   LLDB_REGISTER_METHOD(const char *, SBTarget, GetTriple, ());
   LLDB_REGISTER_METHOD(uint32_t, SBTarget, GetDataByteSize, ());
   LLDB_REGISTER_METHOD(uint32_t, SBTarget, GetCodeByteSize, ());
+  LLDB_REGISTER_METHOD_CONST(uint32_t, SBTarget, GetMaximumNumberOfChildrenToDisplay,());
   LLDB_REGISTER_METHOD(uint32_t, SBTarget, GetAddressByteSize, ());
   LLDB_REGISTER_METHOD(lldb::SBModule, SBTarget, GetModuleAtIndex,
                        (uint32_t));
@@ -2715,6 +2750,8 @@ void RegisterMethods<SBTarget>(Registry &R) {
                        GetInstructionsWithFlavor,
                        (lldb::addr_t, const char *, const void *, size_t));
   LLDB_REGISTER_METHOD(lldb::SBEnvironment, SBTarget, GetEnvironment, ());
+  LLDB_REGISTER_METHOD(lldb::SBTrace, SBTarget, GetTrace, ());
+  LLDB_REGISTER_METHOD(lldb::SBTrace, SBTarget, CreateTrace, (lldb::SBError &));
 }
 
 }

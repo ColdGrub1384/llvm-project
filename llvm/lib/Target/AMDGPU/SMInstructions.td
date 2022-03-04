@@ -57,11 +57,17 @@ class SM_Real <SM_Pseudo ps>
   Instruction Opcode = !cast<Instruction>(NAME);
 
   // copy relevant pseudo op flags
+  let LGKM_CNT             = ps.LGKM_CNT;
+  let SMRD                 = ps.SMRD;
+  let mayStore             = ps.mayStore;
+  let mayLoad              = ps.mayLoad;
+  let hasSideEffects       = ps.hasSideEffects;
+  let UseNamedOperandTable = ps.UseNamedOperandTable;
+  let SchedRW              = ps.SchedRW;
   let SubtargetPredicate   = ps.SubtargetPredicate;
   let AsmMatchConverter    = ps.AsmMatchConverter;
-  let UseNamedOperandTable = ps.UseNamedOperandTable;
-  let SMRD                 = ps.SMRD;
-  let SchedRW              = ps.SchedRW;
+  let IsAtomicRet          = ps.IsAtomicRet;
+  let IsAtomicNoRet        = ps.IsAtomicNoRet;
 
   let TSFlags = ps.TSFlags;
 
@@ -175,15 +181,8 @@ class SM_Time_Pseudo<string opName, SDPatternOperator node = null_frag> : SM_Pse
   " $sdst", [(set i64:$sdst, (node))]> {
   let hasSideEffects = 1;
 
-  // FIXME: This should be definitively mayStore = 0. TableGen
-  // brokenly tries to infer these based on the intrinsic properties
-  // corresponding to the IR attributes. The target intrinsics are
-  // considered as writing to memory for IR dependency purposes, but
-  // those can be modeled with hasSideEffects here. These also end up
-  // inferring differently for llvm.readcyclecounter and the amdgcn
-  // intrinsics.
-  let mayStore = ?;
-  let mayLoad = 1;
+  let mayStore = 0;
+  let mayLoad = 0;
   let has_sbase = 0;
   let has_offset = 0;
 }
@@ -515,7 +514,8 @@ class SMEM_Real_vi <bits<8> op, SM_Pseudo ps>
 
   // VI supports 20-bit unsigned offsets while GFX9+ supports 21-bit signed.
   // Offset value is corrected accordingly when offset is encoded/decoded.
-  let Inst{52-32} = !if(ps.has_offset, offset{20-0}, ?);
+  let Inst{38-32} = !if(ps.has_offset, offset{6-0}, ?);
+  let Inst{52-39} = !if(ps.has_offset, !if(imm, offset{20-7}, ?), ?);
 }
 
 multiclass SM_Real_Loads_vi<bits<8> op, string ps,
@@ -699,12 +699,6 @@ class SMRD_Real_Load_IMM_ci <bits<5> op, SM_Load_Pseudo ps> :
   let DecoderNamespace = "GFX7";
   let InOperandList = (ins ps.BaseClass:$sbase, smrd_literal_offset:$offset, CPol:$cpol);
 
-  let LGKM_CNT = ps.LGKM_CNT;
-  let mayLoad = ps.mayLoad;
-  let mayStore = ps.mayStore;
-  let hasSideEffects = ps.hasSideEffects;
-  let SchedRW = ps.SchedRW;
-
   let Inst{7-0}   = 0xff;
   let Inst{8}     = 0;
   let Inst{14-9}  = sbase{6-1};
@@ -764,11 +758,11 @@ def smrd_load : PatFrag <(ops node:$ptr), (load node:$ptr), [{ return isUniformL
   }];
 }
 
-def SMRDImm         : ComplexPattern<i64, 2, "SelectSMRDImm">;
-def SMRDImm32       : ComplexPattern<i64, 2, "SelectSMRDImm32">;
-def SMRDSgpr        : ComplexPattern<i64, 2, "SelectSMRDSgpr">;
-def SMRDBufferImm   : ComplexPattern<i32, 1, "SelectSMRDBufferImm">;
-def SMRDBufferImm32 : ComplexPattern<i32, 1, "SelectSMRDBufferImm32">;
+def SMRDImm         : ComplexPattern<iPTR, 2, "SelectSMRDImm">;
+def SMRDImm32       : ComplexPattern<iPTR, 2, "SelectSMRDImm32">;
+def SMRDSgpr        : ComplexPattern<iPTR, 2, "SelectSMRDSgpr">;
+def SMRDBufferImm   : ComplexPattern<iPTR, 1, "SelectSMRDBufferImm">;
+def SMRDBufferImm32 : ComplexPattern<iPTR, 1, "SelectSMRDBufferImm32">;
 
 multiclass SMRD_Pattern <string Instr, ValueType vt> {
 

@@ -8,7 +8,7 @@
 
 // UNSUPPORTED: c++03
 
-// XFAIL: LIBCXX-WINDOWS-FIXME
+// XFAIL: LIBCXX-AIX-FIXME
 
 // <filesystem>
 
@@ -207,6 +207,9 @@ TEST_CASE(test_with_ec_dne) {
   }
 }
 
+#ifndef TEST_WIN_NO_FILESYSTEM_PERMS_NONE
+// Windows doesn't support setting perms::none to trigger failures
+// reading directories.
 TEST_CASE(test_with_ec_cannot_resolve) {
   using namespace fs;
   using fs::directory_entry;
@@ -269,5 +272,6 @@ TEST_CASE(test_with_ec_cannot_resolve) {
     TEST_CHECK(CheckEC(sym_status_ec));
   }
 }
+#endif
 
 TEST_SUITE_END()

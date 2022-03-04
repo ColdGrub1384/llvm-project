@@ -16,7 +16,7 @@
 #include "lldb/Utility/FileSpec.h"
 #include "lldb/Utility/Stream.h"
 
-#include <limits.h>
+#include <climits>
 
 using namespace lldb;
 using namespace lldb_private;
@@ -25,9 +25,8 @@ SBFileSpecList::SBFileSpecList() : m_opaque_up(new FileSpecList()) {
   LLDB_RECORD_CONSTRUCTOR_NO_ARGS(SBFileSpecList);
 }
 
-SBFileSpecList::SBFileSpecList(const SBFileSpecList &rhs) : m_opaque_up() {
+SBFileSpecList::SBFileSpecList(const SBFileSpecList &rhs) {
   LLDB_RECORD_CONSTRUCTOR(SBFileSpecList, (const lldb::SBFileSpecList &), rhs);
-
 
   m_opaque_up = clone(rhs.m_opaque_up);
 }

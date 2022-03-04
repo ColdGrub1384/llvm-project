@@ -97,10 +97,12 @@ public:
   /// If this is a byval or inalloca argument, return its alignment.
   /// FIXME: Remove this function once transition to Align is over.
   /// Use getParamAlign() instead.
-  unsigned getParamAlignment() const;
+  uint64_t getParamAlignment() const;
 
   /// If this is a byval or inalloca argument, return its alignment.
   MaybeAlign getParamAlign() const;
+
+  MaybeAlign getParamStackAlign() const;
 
   /// If this is a byval argument, return its type.
   Type *getParamByValType() const;
@@ -159,6 +161,8 @@ public:
 
   /// Remove attributes from an argument.
   void removeAttr(Attribute::AttrKind Kind);
+
+  void removeAttrs(const AttributeMask &AM);
 
   /// Check if an argument has a given attribute.
   bool hasAttribute(Attribute::AttrKind Kind) const;

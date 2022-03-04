@@ -15,6 +15,7 @@
 #include "Format.h"
 #include "HeaderSourceSwitch.h"
 #include "Headers.h"
+#include "InlayHints.h"
 #include "ParsedAST.h"
 #include "Preamble.h"
 #include "Protocol.h"
@@ -70,12 +71,10 @@ struct UpdateIndexCallbacks : public ParsingCallbacks {
       : FIndex(FIndex), ServerCallbacks(ServerCallbacks) {}
 
   void onPreambleAST(PathRef Path, llvm::StringRef Version, ASTContext &Ctx,
-                     std::shared_ptr<clang::Preprocessor> PP,
+                     Preprocessor &PP,
                      const CanonicalIncludes &CanonIncludes) override {
     if (FIndex)
-      FIndex->updatePreamble(Path, Version, Ctx, std::move(PP), CanonIncludes);
-    if (ServerCallbacks)
-      ServerCallbacks->onSemanticsMaybeChanged(Path);
+      FIndex->updatePreamble(Path, Version, Ctx, PP, CanonIncludes);
   }
 
   void onMainAST(PathRef Path, ParsedAST &AST, PublishFn Publish) override {
@@ -102,6 +101,11 @@ struct UpdateIndexCallbacks : public ParsingCallbacks {
   void onFileUpdated(PathRef File, const TUStatus &Status) override {
     if (ServerCallbacks)
       ServerCallbacks->onFileUpdated(File, Status);
+  }
+
+  void onPreamblePublished(PathRef File) override {
+    if (ServerCallbacks)
+      ServerCallbacks->onSemanticsMaybeChanged(File);
   }
 
 private:
@@ -231,6 +235,7 @@ void ClangdServer::addDocument(PathRef File, llvm::StringRef Contents,
   Inputs.Opts = std::move(Opts);
   Inputs.Index = Index;
   Inputs.ClangTidyProvider = ClangTidyProvider;
+  Inputs.FeatureModules = FeatureModules;
   bool NewFile = WorkScheduler->update(File, Inputs, WantDiags);
   // If we loaded Foo.h, we want to make sure Foo.cpp is indexed.
   if (NewFile && BackgroundIdx)
@@ -398,9 +403,11 @@ void ClangdServer::codeComplete(PathRef File, Position Pos,
 }
 
 void ClangdServer::signatureHelp(PathRef File, Position Pos,
+                                 MarkupKind DocumentationFormat,
                                  Callback<SignatureHelp> CB) {
 
   auto Action = [Pos, File = File.str(), CB = std::move(CB),
+                 DocumentationFormat,
                  this](llvm::Expected<InputsAndPreamble> IP) mutable {
     if (!IP)
       return CB(IP.takeError());
@@ -411,7 +418,8 @@ void ClangdServer::signatureHelp(PathRef File, Position Pos,
 
     ParseInputs ParseInput{IP->Command, &TFS, IP->Contents.str()};
     ParseInput.Index = Index;
-    CB(clangd::signatureHelp(File, Pos, *PreambleData, ParseInput));
+    CB(clangd::signatureHelp(File, Pos, *PreambleData, ParseInput,
+                             DocumentationFormat));
   };
 
   // Unlike code completion, we wait for a preamble here.
@@ -547,7 +555,8 @@ void ClangdServer::rename(PathRef File, Position Pos, llvm::StringRef NewName,
 // May generate several candidate selections, due to SelectionTree ambiguity.
 // vector of pointers because GCC doesn't like non-copyable Selection.
 static llvm::Expected<std::vector<std::unique_ptr<Tweak::Selection>>>
-tweakSelection(const Range &Sel, const InputsAndAST &AST) {
+tweakSelection(const Range &Sel, const InputsAndAST &AST,
+               llvm::vfs::FileSystem *FS) {
   auto Begin = positionToOffset(AST.Inputs.Contents, Sel.start);
   if (!Begin)
     return Begin.takeError();
@@ -559,7 +568,7 @@ tweakSelection(const Range &Sel, const InputsAndAST &AST) {
       AST.AST.getASTContext(), AST.AST.getTokens(), *Begin, *End,
       [&](SelectionTree T) {
         Result.push_back(std::make_unique<Tweak::Selection>(
-            AST.Inputs.Index, AST.AST, *Begin, *End, std::move(T)));
+            AST.Inputs.Index, AST.AST, *Begin, *End, std::move(T), FS));
         return false;
       });
   assert(!Result.empty() && "Expected at least one SelectionTree");
@@ -572,12 +581,12 @@ void ClangdServer::enumerateTweaks(
   // Tracks number of times a tweak has been offered.
   static constexpr trace::Metric TweakAvailable(
       "tweak_available", trace::Metric::Counter, "tweak_id");
-  auto Action = [File = File.str(), Sel, CB = std::move(CB),
-                 Filter =
-                     std::move(Filter)](Expected<InputsAndAST> InpAST) mutable {
+  auto Action = [Sel, CB = std::move(CB), Filter = std::move(Filter),
+                 FeatureModules(this->FeatureModules)](
+                    Expected<InputsAndAST> InpAST) mutable {
     if (!InpAST)
       return CB(InpAST.takeError());
-    auto Selections = tweakSelection(Sel, *InpAST);
+    auto Selections = tweakSelection(Sel, *InpAST, /*FS=*/nullptr);
     if (!Selections)
       return CB(Selections.takeError());
     std::vector<TweakRef> Res;
@@ -587,7 +596,7 @@ void ClangdServer::enumerateTweaks(
       return Filter(T) && !PreparedTweaks.count(T.id());
     };
     for (const auto &Sel : *Selections) {
-      for (auto &T : prepareTweaks(*Sel, DeduplicatingFilter)) {
+      for (auto &T : prepareTweaks(*Sel, DeduplicatingFilter, FeatureModules)) {
         Res.push_back({T->id(), T->title(), T->kind()});
         PreparedTweaks.insert(T->id());
         TweakAvailable.record(1, T->id());
@@ -615,14 +624,15 @@ void ClangdServer::applyTweak(PathRef File, Range Sel, StringRef TweakID,
                  this](Expected<InputsAndAST> InpAST) mutable {
     if (!InpAST)
       return CB(InpAST.takeError());
-    auto Selections = tweakSelection(Sel, *InpAST);
+    auto FS = DirtyFS->view(llvm::None);
+    auto Selections = tweakSelection(Sel, *InpAST, FS.get());
     if (!Selections)
       return CB(Selections.takeError());
     llvm::Optional<llvm::Expected<Tweak::Effect>> Effect;
     // Try each selection, take the first one that prepare()s.
     // If they all fail, Effect will hold get the last error.
     for (const auto &Selection : *Selections) {
-      auto T = prepareTweak(TweakID, *Selection);
+      auto T = prepareTweak(TweakID, *Selection, FeatureModules);
       if (T) {
         Effect = (*T)->apply(*Selection);
         break;
@@ -630,8 +640,8 @@ void ClangdServer::applyTweak(PathRef File, Range Sel, StringRef TweakID,
       Effect = T.takeError();
     }
     assert(Effect.hasValue() && "Expected at least one selection");
-    if (*Effect) {
-      // Tweaks don't apply clang-format, do that centrally here.
+    if (*Effect && (*Effect)->FormatEdits) {
+      // Format tweaks that require it centrally here.
       for (auto &It : (*Effect)->ApplyEdits) {
         Edit &E = It.second;
         format::FormatStyle Style =
@@ -747,6 +757,17 @@ void ClangdServer::incomingCalls(
                      [CB = std::move(CB), Item, this]() mutable {
                        CB(clangd::incomingCalls(Item, Index));
                      });
+}
+
+void ClangdServer::inlayHints(PathRef File, llvm::Optional<Range> RestrictRange,
+                              Callback<std::vector<InlayHint>> CB) {
+  auto Action = [RestrictRange(std::move(RestrictRange)),
+                 CB = std::move(CB)](Expected<InputsAndAST> InpAST) mutable {
+    if (!InpAST)
+      return CB(InpAST.takeError());
+    CB(clangd::inlayHints(InpAST->AST, std::move(RestrictRange)));
+  };
+  WorkScheduler->runWithAST("InlayHints", File, std::move(Action));
 }
 
 void ClangdServer::onFileEvent(const DidChangeWatchedFilesParams &Params) {
@@ -868,22 +889,29 @@ void ClangdServer::semanticHighlights(
                             Transient);
 }
 
-void ClangdServer::getAST(PathRef File, Range R,
+void ClangdServer::getAST(PathRef File, llvm::Optional<Range> R,
                           Callback<llvm::Optional<ASTNode>> CB) {
   auto Action =
       [R, CB(std::move(CB))](llvm::Expected<InputsAndAST> Inputs) mutable {
         if (!Inputs)
           return CB(Inputs.takeError());
+        if (!R) {
+          // It's safe to pass in the TU, as dumpAST() does not
+          // deserialize the preamble.
+          auto Node = DynTypedNode::create(
+                *Inputs->AST.getASTContext().getTranslationUnitDecl());
+          return CB(dumpAST(Node, Inputs->AST.getTokens(),
+                            Inputs->AST.getASTContext()));
+        }
         unsigned Start, End;
-        if (auto Offset = positionToOffset(Inputs->Inputs.Contents, R.start))
+        if (auto Offset = positionToOffset(Inputs->Inputs.Contents, R->start))
           Start = *Offset;
         else
           return CB(Offset.takeError());
-        if (auto Offset = positionToOffset(Inputs->Inputs.Contents, R.end))
+        if (auto Offset = positionToOffset(Inputs->Inputs.Contents, R->end))
           End = *Offset;
         else
           return CB(Offset.takeError());
-
         bool Success = SelectionTree::createEach(
             Inputs->AST.getASTContext(), Inputs->AST.getTokens(), Start, End,
             [&](SelectionTree T) {

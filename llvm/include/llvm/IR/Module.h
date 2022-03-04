@@ -47,9 +47,7 @@ class GVMaterializer;
 class LLVMContext;
 class MemoryBuffer;
 class ModuleSummaryIndex;
-class Pass;
 class RandomNumberGenerator;
-template <class PtrType> class SmallPtrSetImpl;
 class StructType;
 class VersionTuple;
 
@@ -64,9 +62,9 @@ class VersionTuple;
 /// constant references to global variables in the module.  When a global
 /// variable is destroyed, it should have no entries in the GlobalValueRefMap.
 /// The main container class for the LLVM Intermediate Representation.
-class Module {
-/// @name Types And Enumerations
-/// @{
+class LLVM_EXTERNAL_VISIBILITY Module {
+  /// @name Types And Enumerations
+  /// @{
 public:
   /// The type for the list of global variables.
   using GlobalListType = SymbolTableList<GlobalVariable>;
@@ -323,6 +321,9 @@ public:
   /// arbitrary type. This method returns null if a global with the specified
   /// name is not found.
   GlobalValue *getNamedValue(StringRef Name) const;
+
+  /// Return the number of global values in the module.
+  unsigned getNumNamedValues() const;
 
   /// Return a unique non-zero ID for the specified metadata kind. This ID is
   /// uniqued across modules in the current LLVMContext.
@@ -718,14 +719,19 @@ public:
   }
 
   /// An iterator for DICompileUnits that skips those marked NoDebug.
-  class debug_compile_units_iterator
-      : public std::iterator<std::input_iterator_tag, DICompileUnit *> {
+  class debug_compile_units_iterator {
     NamedMDNode *CUs;
     unsigned Idx;
 
     void SkipNoDebugCUs();
 
   public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = DICompileUnit *;
+    using difference_type = std::ptrdiff_t;
+    using pointer = value_type *;
+    using reference = value_type &;
+
     explicit debug_compile_units_iterator(NamedMDNode *CUs, unsigned Idx)
         : CUs(CUs), Idx(Idx) {
       SkipNoDebugCUs();
@@ -881,6 +887,33 @@ public:
   /// Set that PLT should be avoid for RTLib calls.
   void setRtLibUseGOT();
 
+  /// Get/set whether synthesized functions should get the uwtable attribute.
+  bool getUwtable() const;
+  void setUwtable();
+
+  /// Get/set whether synthesized functions should get the "frame-pointer"
+  /// attribute.
+  FramePointerKind getFramePointer() const;
+  void setFramePointer(FramePointerKind Kind);
+
+  /// Get/set what kind of stack protector guard to use.
+  StringRef getStackProtectorGuard() const;
+  void setStackProtectorGuard(StringRef Kind);
+
+  /// Get/set which register to use as the stack protector guard register. The
+  /// empty string is equivalent to "global". Other values may be "tls" or
+  /// "sysreg".
+  StringRef getStackProtectorGuardReg() const;
+  void setStackProtectorGuardReg(StringRef Reg);
+
+  /// Get/set what offset from the stack protector to use.
+  int getStackProtectorGuardOffset() const;
+  void setStackProtectorGuardOffset(int Offset);
+
+  /// Get/set the stack alignment overridden from the default.
+  unsigned getOverrideStackAlignment() const;
+  void setOverrideStackAlignment(unsigned Align);
+
   /// @name Utility functions for querying and setting the build SDK version
   /// @{
 
@@ -899,6 +932,17 @@ public:
   /// Set the partial sample profile ratio in the profile summary module flag,
   /// if applicable.
   void setPartialSampleProfileRatio(const ModuleSummaryIndex &Index);
+
+  /// Get the target variant triple which is a string describing a variant of
+  /// the target host platform. For example, Mac Catalyst can be a variant
+  /// target triple for a macOS target.
+  /// @returns a string containing the target variant triple.
+  StringRef getDarwinTargetVariantTriple() const;
+
+  /// Get the target variant version build SDK version metadata.
+  ///
+  /// An empty version is returned if no such metadata is attached.
+  VersionTuple getDarwinTargetVariantSDKVersion() const;
 };
 
 /// Given "llvm.used" or "llvm.compiler.used" as a global name, collect the

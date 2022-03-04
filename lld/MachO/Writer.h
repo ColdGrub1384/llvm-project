@@ -25,7 +25,8 @@ public:
   virtual void writeTo(uint8_t *buf) const = 0;
 };
 
-void writeResult();
+template <class LP> void writeResult();
+void resetWriter();
 
 void createSyntheticSections();
 

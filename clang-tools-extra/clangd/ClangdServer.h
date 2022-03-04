@@ -38,6 +38,7 @@
 #include "llvm/ADT/Optional.h"
 #include "llvm/ADT/StringRef.h"
 #include <functional>
+#include <memory>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -224,7 +225,8 @@ public:
 
   /// Provide signature help for \p File at \p Pos.  This method should only be
   /// called for tracked files.
-  void signatureHelp(PathRef File, Position Pos, Callback<SignatureHelp> CB);
+  void signatureHelp(PathRef File, Position Pos, MarkupKind DocumentationFormat,
+                     Callback<SignatureHelp> CB);
 
   /// Find declaration/definition locations of symbol at a specified position.
   void locateSymbolAt(PathRef File, Position Pos,
@@ -260,6 +262,10 @@ public:
   /// Resolve incoming calls for a given call hierarchy item.
   void incomingCalls(const CallHierarchyItem &Item,
                      Callback<std::vector<CallHierarchyIncomingCall>>);
+
+  /// Resolve inlay hints for a given document.
+  void inlayHints(PathRef File, llvm::Optional<Range> RestrictRange,
+                  Callback<std::vector<InlayHint>>);
 
   /// Retrieve the top symbols from the workspace matching a query.
   void workspaceSymbols(StringRef Query, int Limit,
@@ -340,7 +346,8 @@ public:
                           Callback<std::vector<HighlightingToken>>);
 
   /// Describe the AST subtree for a piece of code.
-  void getAST(PathRef File, Range R, Callback<llvm::Optional<ASTNode>> CB);
+  void getAST(PathRef File, llvm::Optional<Range> R,
+              Callback<llvm::Optional<ASTNode>> CB);
 
   /// Runs an arbitrary action that has access to the AST of the specified file.
   /// The action will execute on one of ClangdServer's internal threads.

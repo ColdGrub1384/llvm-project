@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "ExecutionUtils.h"
-#include "RemoteJITUtils.h"
+#include "ForwardingMemoryManager.h"
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/ADT/Triple.h"
 #include "llvm/Bitcode/BitcodeReader.h"
@@ -22,21 +22,21 @@
 #include "llvm/Config/llvm-config.h"
 #include "llvm/ExecutionEngine/GenericValue.h"
 #include "llvm/ExecutionEngine/Interpreter.h"
-#include "llvm/ExecutionEngine/JITSymbol.h"
 #include "llvm/ExecutionEngine/JITEventListener.h"
+#include "llvm/ExecutionEngine/JITSymbol.h"
 #include "llvm/ExecutionEngine/MCJIT.h"
 #include "llvm/ExecutionEngine/ObjectCache.h"
 #include "llvm/ExecutionEngine/Orc/DebugObjectManagerPlugin.h"
 #include "llvm/ExecutionEngine/Orc/DebugUtils.h"
+#include "llvm/ExecutionEngine/Orc/EPCDebugObjectRegistrar.h"
+#include "llvm/ExecutionEngine/Orc/EPCEHFrameRegistrar.h"
+#include "llvm/ExecutionEngine/Orc/EPCGenericRTDyldMemoryManager.h"
 #include "llvm/ExecutionEngine/Orc/ExecutionUtils.h"
 #include "llvm/ExecutionEngine/Orc/JITTargetMachineBuilder.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
-#include "llvm/ExecutionEngine/Orc/MachOPlatform.h"
-#include "llvm/ExecutionEngine/Orc/OrcRemoteTargetClient.h"
 #include "llvm/ExecutionEngine/Orc/RTDyldObjectLinkingLayer.h"
+#include "llvm/ExecutionEngine/Orc/SimpleRemoteEPC.h"
 #include "llvm/ExecutionEngine/Orc/SymbolStringPool.h"
-#include "llvm/ExecutionEngine/Orc/TPCDebugObjectRegistrar.h"
-#include "llvm/ExecutionEngine/Orc/TPCEHFrameRegistrar.h"
 #include "llvm/ExecutionEngine/Orc/TargetProcess/JITLoaderGDB.h"
 #include "llvm/ExecutionEngine/Orc/TargetProcess/RegisterEHFrames.h"
 #include "llvm/ExecutionEngine/Orc/TargetProcess/TargetExecutionUtils.h"
@@ -68,6 +68,12 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Instrumentation.h"
 #include <cerrno>
+
+#if !defined(_MSC_VER) && !defined(__MINGW32__)
+#include <unistd.h>
+#else
+#include <io.h>
+#endif
 
 #ifdef __CYGWIN__
 #include <cygwin/version.h>
@@ -208,13 +214,12 @@ private:
       return false;
 
     std::string CacheSubdir = ModID.substr(PrefixLength);
-#if defined(_WIN32)
-    // Transform "X:\foo" => "/X\foo" for convenience.
-    if (isalpha(CacheSubdir[0]) && CacheSubdir[1] == ':') {
+    // Transform "X:\foo" => "/X\foo" for convenience on Windows.
+    if (is_style_windows(llvm::sys::path::Style::native) &&
+        isalpha(CacheSubdir[0]) && CacheSubdir[1] == ':') {
       CacheSubdir[1] = CacheSubdir[0];
       CacheSubdir[0] = '/';
     }
-#endif
 
     CacheName = CacheDir + CacheSubdir;
     size_t pos = CacheName.rfind('.');
@@ -228,8 +233,7 @@ CodeGenOpt::Level getOptLevel() {
   llvm_unreachable("Unrecognized opt level.");
 }
 
-LLVM_ATTRIBUTE_NORETURN
-static void reportError(SMDiagnostic Err, const char *ProgName) {
+[[noreturn]] static void reportError(SMDiagnostic Err, const char *ProgName) {
   Err.print(ProgName, errs());
   exit(1);
 }
@@ -237,6 +241,7 @@ static void reportError(SMDiagnostic Err, const char *ProgName) {
 //Error loadDylibs();
 int runOrcJIT(const char *ProgName);
 void disallowOrcOptions();
+Expected<std::unique_ptr<orc::ExecutorProcessControl>> launchRemote();
 
 extern "C" {
 //===----------------------------------------------------------------------===//
@@ -369,6 +374,7 @@ int main(int argc, char **argv, char * const *envp) {
 
   // If the program doesn't explicitly call exit, we will need the Exit
   // function later on to make an explicit call, so get the function now.
+
 #if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
   // on iOS, normally, ForceInterpreter = true, but if your run the JIT you need this:
   FunctionCallee Exit;
@@ -414,6 +420,59 @@ int main(int argc, char **argv, char * const *envp) {
   
   return Result;
 }
+
+static std::function<void(Module &)> createDebugDumper() {
+  switch (OrcDumpKind) {
+  case DumpKind::NoDump:
+    return [](Module &M) {};
+
+  case DumpKind::DumpFuncsToStdOut:
+    return [](Module &M) {
+      printf("[ ");
+
+      for (const auto &F : M) {
+        if (F.isDeclaration())
+          continue;
+
+        if (F.hasName()) {
+          std::string Name(std::string(F.getName()));
+          printf("%s ", Name.c_str());
+        } else
+          printf("<anon> ");
+      }
+
+      printf("]\n");
+    };
+
+  case DumpKind::DumpModsToStdOut:
+    return [](Module &M) {
+      outs() << "----- Module Start -----\n" << M << "----- Module End -----\n";
+    };
+
+  case DumpKind::DumpModsToDisk:
+    return [](Module &M) {
+      std::error_code EC;
+      raw_fd_ostream Out(M.getModuleIdentifier() + ".ll", EC,
+                         sys::fs::OF_TextWithCRLF);
+      if (EC) {
+        errs() << "Couldn't open " << M.getModuleIdentifier()
+               << " for dumping.\nError:" << EC.message() << "\n";
+        exit(1);
+      }
+      Out << M;
+    };
+  }
+  llvm_unreachable("Unknown DumpKind");
+}
+
+Error loadDylibs() {
+  for (const auto &Dylib : Dylibs) {
+    std::string ErrMsg;
+    if (sys::DynamicLibrary::LoadLibraryPermanently(Dylib.c_str(), &ErrMsg))
+      return make_error<StringError>(ErrMsg, inconvertibleErrorCode());
+  }
+
+  return Error::success();
 }
 
 Expected<orc::ThreadSafeModule>
@@ -433,4 +492,5 @@ loadModule(StringRef Path, orc::ThreadSafeContext TSCtx) {
 }
 
 void disallowOrcOptions() {
+
 }

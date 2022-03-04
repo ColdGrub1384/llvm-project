@@ -200,7 +200,7 @@ Expected<int> LLI::ExecuteProgram(const std::string &Bitcode,
   outs() << "<lli>";
   outs().flush();
   LLVM_DEBUG(errs() << "\nAbout to run:\t";
-             for (unsigned i = 0, e = LLIArgs.size() - 1; i != e; ++i) errs()
+             for (unsigned i = 0, e = LLIArgs.size(); i != e; ++i) errs()
              << " " << LLIArgs[i];
              errs() << "\n";);
   return RunProgramWithTimeout(LLIPath, LLIArgs, InputFile, OutputFile,
@@ -468,7 +468,7 @@ Expected<CC::FileType> LLC::OutputCode(const std::string &Bitcode,
   outs() << (UseIntegratedAssembler ? "<llc-ia>" : "<llc>");
   outs().flush();
   LLVM_DEBUG(errs() << "\nAbout to run:\t";
-             for (unsigned i = 0, e = LLCArgs.size() - 1; i != e; ++i) errs()
+             for (unsigned i = 0, e = LLCArgs.size(); i != e; ++i) errs()
              << " " << LLCArgs[i];
              errs() << "\n";);
   if (RunProgramWithTimeout(LLCPath, LLCArgs, "", "", "", Timeout, MemoryLimit))
@@ -586,7 +586,7 @@ Expected<int> JIT::ExecuteProgram(const std::string &Bitcode,
   outs() << "<jit>";
   outs().flush();
   LLVM_DEBUG(errs() << "\nAbout to run:\t";
-             for (unsigned i = 0, e = JITArgs.size() - 1; i != e; ++i) errs()
+             for (unsigned i = 0, e = JITArgs.size(); i != e; ++i) errs()
              << " " << JITArgs[i];
              errs() << "\n";);
   LLVM_DEBUG(errs() << "\nSending output to " << OutputFile << "\n");
@@ -615,12 +615,12 @@ AbstractInterpreter::createJIT(const char *Argv0, std::string &Message,
 
 static bool IsARMArchitecture(std::vector<StringRef> Args) {
   for (size_t I = 0; I < Args.size(); ++I) {
-    if (!Args[I].equals_lower("-arch"))
+    if (!Args[I].equals_insensitive("-arch"))
       continue;
     ++I;
     if (I == Args.size())
       break;
-    if (Args[I].startswith_lower("arm"))
+    if (Args[I].startswith_insensitive("arm"))
       return true;
   }
 
@@ -693,7 +693,7 @@ Expected<int> CC::ExecuteProgram(const std::string &ProgramFile,
   outs() << "<CC>";
   outs().flush();
   LLVM_DEBUG(errs() << "\nAbout to run:\t";
-             for (unsigned i = 0, e = CCArgs.size() - 1; i != e; ++i) errs()
+             for (unsigned i = 0, e = CCArgs.size(); i != e; ++i) errs()
              << " " << CCArgs[i];
              errs() << "\n";);
   if (RunProgramWithTimeout(CCPath, CCArgs, "", "", ""))
@@ -741,7 +741,7 @@ Expected<int> CC::ExecuteProgram(const std::string &ProgramFile,
   outs().flush();
   LLVM_DEBUG(
       errs() << "\nAbout to run:\t";
-      for (unsigned i = 0, e = ProgramArgs.size() - 1; i != e; ++i) errs()
+      for (unsigned i = 0, e = ProgramArgs.size(); i != e; ++i) errs()
       << " " << ProgramArgs[i];
       errs() << "\n";);
 
@@ -837,7 +837,7 @@ Error CC::MakeSharedObject(const std::string &InputFile, FileType fileType,
   outs() << "<CC>";
   outs().flush();
   LLVM_DEBUG(errs() << "\nAbout to run:\t";
-             for (unsigned i = 0, e = CCArgs.size() - 1; i != e; ++i) errs()
+             for (unsigned i = 0, e = CCArgs.size(); i != e; ++i) errs()
              << " " << CCArgs[i];
              errs() << "\n";);
   if (RunProgramWithTimeout(CCPath, CCArgs, "", "", ""))

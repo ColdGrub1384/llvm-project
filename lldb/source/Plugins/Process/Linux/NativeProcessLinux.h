@@ -49,6 +49,8 @@ public:
     llvm::Expected<std::unique_ptr<NativeProcessProtocol>>
     Attach(lldb::pid_t pid, NativeDelegate &native_delegate,
            MainLoop &mainloop) const override;
+
+    Extension GetSupportedExtensions() const override;
   };
 
   // NativeProcessProtocol Interface
@@ -77,6 +79,12 @@ public:
                                               uint32_t permissions) override;
 
   llvm::Error DeallocateMemory(lldb::addr_t addr) override;
+
+  Status ReadMemoryTags(int32_t type, lldb::addr_t addr, size_t len,
+                        std::vector<uint8_t> &tags) override;
+
+  Status WriteMemoryTags(int32_t type, lldb::addr_t addr, size_t len,
+                         const std::vector<uint8_t> &tags) override;
 
   size_t UpdateThreads() override;
 
@@ -136,6 +144,7 @@ protected:
 private:
   MainLoop::SignalHandleUP m_sigchld_handle;
   ArchSpec m_arch;
+  MainLoop& m_main_loop;
 
   LazyBool m_supports_mem_region = eLazyBoolCalculate;
   std::vector<std::pair<MemoryRegionInfo, FileSpec>> m_mem_region_cache;
@@ -155,9 +164,9 @@ private:
 
   static Status SetDefaultPtraceOpts(const lldb::pid_t);
 
-  void MonitorCallback(lldb::pid_t pid, bool exited, WaitStatus status);
+  void MonitorCallback(NativeThreadLinux &thread, WaitStatus status);
 
-  void WaitForNewThread(::pid_t tid);
+  void WaitForCloneNotification(::pid_t pid);
 
   void MonitorSIGTRAP(const siginfo_t &info, NativeThreadLinux &thread);
 
@@ -167,12 +176,11 @@ private:
 
   void MonitorWatchpoint(NativeThreadLinux &thread, uint32_t wp_index);
 
-  void MonitorSignal(const siginfo_t &info, NativeThreadLinux &thread,
-                     bool exited);
+  void MonitorSignal(const siginfo_t &info, NativeThreadLinux &thread);
 
   bool HasThreadNoLock(lldb::tid_t thread_id);
 
-  bool StopTrackingThread(lldb::tid_t thread_id);
+  void StopTrackingThread(NativeThreadLinux &thread);
 
   /// Create a new thread.
   ///
@@ -234,6 +242,10 @@ private:
 
   /// Manages Intel PT process and thread traces.
   IntelPTManager m_intel_pt_manager;
+
+  // Handle a clone()-like event.
+  bool MonitorClone(NativeThreadLinux &parent, lldb::pid_t child_pid,
+                    int event);
 };
 
 } // namespace process_linux
