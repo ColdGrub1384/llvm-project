@@ -45,15 +45,6 @@
 #include <utility>
 #include <vector>
 
-#ifdef HAVE_FFI_CALL
-#ifdef HAVE_FFI_H
-#include <ffi.h>
-#define USE_LIBFFI
-#elif HAVE_FFI_FFI_H
-#include <ffi/ffi.h>
-#define USE_LIBFFI
-#endif
-#endif
 
 #ifdef __APPLE__
 #include <TargetConditionals.h>
@@ -63,6 +54,7 @@
 #include <objc/message.h>
 #include "ios_error.h"
 #include <fcntl.h>
+
 #include <Python.h>
 #define Py_BUILD_CORE 1
 #include "pycore_tuple.h"
@@ -70,12 +62,24 @@
 #include "pycore_gc.h"
 #include "pycore_initconfig.h"
 #include "pycore_object.h"
-#endif
-#endif
 
 extern "C" {
     void llvm_remove_traverse_from_cython_type(PyObject *type);
 }
+#else
+#undef HAVE_FFI_CALL
+#endif
+#endif
+
+#ifdef HAVE_FFI_CALL
+#ifdef HAVE_FFI_H
+#include <ffi.h>
+#define USE_LIBFFI
+#elif HAVE_FFI_FFI_H
+#include <ffi/ffi.h>
+#define USE_LIBFFI
+#endif
+#endif
 
 /* New getargs implementation */
 
@@ -88,6 +92,7 @@ size_t strlen(void *str);
 #ifdef __cplusplus
 extern "C" {
 #endif
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
 int PyArg_Parse(PyObject *, const char *, ...);
 int PyArg_ParseTuple(PyObject *, const char *, ...);
 int PyArg_VaParse(PyObject *, const char *, va_list);
@@ -2864,6 +2869,8 @@ _PyArg_Fini(void)
     static_arg_parsers = NULL;
 }
 
+#endif
+
 #ifdef __cplusplus
 };
 #endif
@@ -4117,8 +4124,6 @@ static GenericValue lle_X_PyObject_SetAttrString(FunctionType *FT,
   GV.IntVal = PyObject_SetAttrString(v, name, w);
   return GV;
 }
-
-// TODO: Define PyObject_GC_UnTrack in cext_glue.c
 
 #endif //  (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
 

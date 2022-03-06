@@ -110,13 +110,13 @@ int llvm_ios_scanf (const char *format, ...) {
     return (count);
 }
 int llvm_ios_fputc(int c, FILE *stream) {
-	if (fileno(stream) == STDOUT_FILENO) return fputc(c, thread_stdout); 
-	if (fileno(stream) == STDERR_FILENO) return fputc(c, thread_stderr); 
+	if (fileno(stream) == STDOUT_FILENO) return fputc(c, thread_stdout);
+	if (fileno(stream) == STDERR_FILENO) return fputc(c, thread_stderr);
 	return fputc(c, stream);
 }
 int llvm_ios_putw(int w, FILE *stream) {
-	if (fileno(stream) == STDOUT_FILENO) return putw(w, thread_stdout); 
-	if (fileno(stream) == STDERR_FILENO) return putw(w, thread_stderr); 
+	if (fileno(stream) == STDOUT_FILENO) return putw(w, thread_stdout);
+	if (fileno(stream) == STDERR_FILENO) return putw(w, thread_stderr);
 	return putw(w, stream);
 }
 }
@@ -420,59 +420,6 @@ int main(int argc, char **argv, char * const *envp) {
   
   return Result;
 }
-
-static std::function<void(Module &)> createDebugDumper() {
-  switch (OrcDumpKind) {
-  case DumpKind::NoDump:
-    return [](Module &M) {};
-
-  case DumpKind::DumpFuncsToStdOut:
-    return [](Module &M) {
-      printf("[ ");
-
-      for (const auto &F : M) {
-        if (F.isDeclaration())
-          continue;
-
-        if (F.hasName()) {
-          std::string Name(std::string(F.getName()));
-          printf("%s ", Name.c_str());
-        } else
-          printf("<anon> ");
-      }
-
-      printf("]\n");
-    };
-
-  case DumpKind::DumpModsToStdOut:
-    return [](Module &M) {
-      outs() << "----- Module Start -----\n" << M << "----- Module End -----\n";
-    };
-
-  case DumpKind::DumpModsToDisk:
-    return [](Module &M) {
-      std::error_code EC;
-      raw_fd_ostream Out(M.getModuleIdentifier() + ".ll", EC,
-                         sys::fs::OF_TextWithCRLF);
-      if (EC) {
-        errs() << "Couldn't open " << M.getModuleIdentifier()
-               << " for dumping.\nError:" << EC.message() << "\n";
-        exit(1);
-      }
-      Out << M;
-    };
-  }
-  llvm_unreachable("Unknown DumpKind");
-}
-
-Error loadDylibs() {
-  for (const auto &Dylib : Dylibs) {
-    std::string ErrMsg;
-    if (sys::DynamicLibrary::LoadLibraryPermanently(Dylib.c_str(), &ErrMsg))
-      return make_error<StringError>(ErrMsg, inconvertibleErrorCode());
-  }
-
-  return Error::success();
 }
 
 Expected<orc::ThreadSafeModule>

@@ -317,67 +317,58 @@ StringRef Value::getName() const {
 
 void Value::setNameImpl(const Twine &NewName) {
   // Fast-path: LLVMContext can be set to strip out non-GlobalValue names
-  if (getContext().shouldDiscardValueNames() && !isa<GlobalValue>(this)) {
+  if (getContext().shouldDiscardValueNames() && !isa<GlobalValue>(this))
     return;
-  }
-  
+
   // Fast path for common IRBuilder case of setName("") when there is no name.
-  if (NewName.isTriviallyEmpty() && !hasName()) {
+  if (NewName.isTriviallyEmpty() && !hasName())
     return;
-  }
-  
+
   SmallString<256> NameData;
   StringRef NameRef = NewName.toStringRef(NameData);
   assert(NameRef.find_first_of(0) == StringRef::npos &&
          "Null bytes are not allowed in names");
-  
+
   // Name isn't changing?
   if (getName() == NameRef)
     return;
-  
-  // Cap the size of non-GlobalValue names.
-  if (NameRef.size() > NonGlobalValueMaxNameSize && !isa<GlobalValue>(this))
-    NameRef =
-        NameRef.substr(0, std::max(1u, (unsigned)NonGlobalValueMaxNameSize));
-  
+
   assert(!getType()->isVoidTy() && "Cannot assign a name to void values!");
 
   // Get the symbol table to update for this object.
   ValueSymbolTable *ST;
   if (getSymTab(this, ST))
     return;  // Cannot set a name on this value (e.g. constant).
-  
+
   if (!ST) { // No symbol table to update?  Just do the change.
     if (NameRef.empty()) {
       // Free the name for this value.
       destroyValueName();
       return;
     }
-    
+
     // NOTE: Could optimize for the case the name is shrinking to not deallocate
     // then reallocated.
     destroyValueName();
-    
+
     // Create the new name.
     MallocAllocator Allocator;
     setValueName(ValueName::Create(NameRef, Allocator));
     getValueName()->setValue(this);
-        
     return;
   }
-  
+
   // NOTE: Could optimize for the case the name is shrinking to not deallocate
   // then reallocated.
   if (hasName()) {
-    
     // Remove old name.
     ST->removeValueName(getValueName());
     destroyValueName();
-    
+
     if (NameRef.empty())
       return;
   }
-  
+
   // Name is changing to something new.
   setValueName(ST->createValueName(NameRef, this));
 }

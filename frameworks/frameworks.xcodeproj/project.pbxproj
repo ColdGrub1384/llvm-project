@@ -687,6 +687,7 @@
 				2237943F209B523500B15016 /* libLLVM */,
 				22C505BD209A3B5800FDDFA9 /* Products */,
 				22C505C7209A3B8700FDDFA9 /* Frameworks */,
+				B595003027D2863E001BF6B6 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -711,7 +712,6 @@
 			isa = PBXGroup;
 			children = (
 				B5559A30278DE85B001D6BA7 /* libFFI.a */,
-				22BAC5D6259CAF2500B51FD6 /* liblldMachO2.a */,
 				22BAC5D4259CAE0800B51FD6 /* liblldWasm.a */,
 				22BAC5D2259CADCE00B51FD6 /* liblldMachO.a */,
 				22BAC5D0259CAD8500B51FD6 /* liblldCOFF.a */,
@@ -908,6 +908,16 @@
 				89058C35239E7EFB0094F4DE /* Info.plist */,
 			);
 			path = llc;
+			sourceTree = "<group>";
+		};
+		B595003027D2863E001BF6B6 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				224ADB16278DB212009AC3B9 /* liblldCommon.a */,
+				224ADB1A278DB22D009AC3B9 /* liblldMinGW.a */,
+				224ADB18278DB21A009AC3B9 /* liblldELF.a */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1780,6 +1790,8 @@
 					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
 					"-F",
 					..,
+					"-undefined",
+					dynamic_lookup,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.libLLVM";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -1816,6 +1828,8 @@
 					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
 					"-F",
 					..,
+					"-undefined",
+					dynamic_lookup,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.libLLVM";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
