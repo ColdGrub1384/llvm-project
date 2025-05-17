@@ -28,7 +28,7 @@
 		222BE57F2BE62E6D002E4272 /* libLLVMFrontendOpenMP.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 222BE57D2BE62E6D002E4272 /* libLLVMFrontendOpenMP.a */; };
 		222BE5802BE62E6D002E4272 /* libLLVMFrontendOpenACC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 222BE57E2BE62E6D002E4272 /* libLLVMFrontendOpenACC.a */; };
 		222BE5822BE6313A002E4272 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 222BE5812BE6313A002E4272 /* libz.tbd */; };
-		222BE5842BE6323D002E4272 /* NewPMDriver.cpp.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 222BE5832BE6323D002E4272 /* NewPMDriver.cpp.o */; platformFilter = ios; };
+		222BE5842BE6323D002E4272 /* NewPMDriver.cpp.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 222BE5832BE6323D002E4272 /* NewPMDriver.cpp.o */; };
 		22379399209B047C00B15016 /* opt.h in Headers */ = {isa = PBXBuildFile; fileRef = 22379397209B047C00B15016 /* opt.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2237939E209B048C00B15016 /* libopt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2237939D209B048C00B15016 /* libopt.a */; };
 		223793A0209B04D300B15016 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 22C505CC209A3CB500FDDFA9 /* libc++.tbd */; };
@@ -172,7 +172,6 @@
 		22C1E8B324BF70D600C57472 /* libLLVMX86Info.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 22C1E8AE24BF70D500C57472 /* libLLVMX86Info.a */; };
 		22C1E8B624BF715100C57472 /* libLLVMX86CodeGen.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 22C1E8B524BF715100C57472 /* libLLVMX86CodeGen.a */; };
 		22C505CD209A3CB500FDDFA9 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 22C505CC209A3CB500FDDFA9 /* libc++.tbd */; };
-		22E95EBE278CA5CD00655675 /* WebAssemblyTypeUtilities.cpp.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 22E95EBC278CA5CD00655675 /* WebAssemblyTypeUtilities.cpp.o */; platformFilter = ios; };
 		22F4B308238C8BD8002C1DD6 /* lli.cpp.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 22F4B307238C8BD8002C1DD6 /* lli.cpp.o */; };
 		22F9512F20AF0677006268D5 /* libobjc.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 22C1D2E720A841E60093127F /* libobjc.tbd */; };
 		89058C32239E66F20094F4DE /* llc.cpp.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 89058C31239E66D10094F4DE /* llc.cpp.o */; };
@@ -184,6 +183,18 @@
 		89DD5C65239CDE7100382F34 /* libLLVMWebAssemblyInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 89DD5C60239CDE3D00382F34 /* libLLVMWebAssemblyInfo.a */; };
 		89DD5C6A239D1A1D00382F34 /* libLLVM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2237943E209B523500B15016 /* libLLVM.framework */; };
 		89DD5C6B239D1A1D00382F34 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 22C505CC209A3CB500FDDFA9 /* libc++.tbd */; };
+		B57DF7C52DD9243F00EF07F8 /* libclangAnalysisFlowSensitive.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B57DF7C22DD9242900EF07F8 /* libclangAnalysisFlowSensitive.a */; };
+		B57DF7C62DD9243F00EF07F8 /* libclangAnalysisFlowSensitiveModels.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B57DF7C12DD9242900EF07F8 /* libclangAnalysisFlowSensitiveModels.a */; };
+		B57DF7C82DD9245600EF07F8 /* libclangDependencyScanning.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B57DF7C72DD9245600EF07F8 /* libclangDependencyScanning.a */; };
+		B57DF7CA2DD924A800EF07F8 /* libclangHandleLLVM.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B57DF7C92DD924A800EF07F8 /* libclangHandleLLVM.a */; };
+		B57DF7CC2DD924BA00EF07F8 /* libclangIndexSerialization.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B57DF7CB2DD924BA00EF07F8 /* libclangIndexSerialization.a */; };
+		B57DF7D02DD9254900EF07F8 /* libclangToolingInclusionsStdlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B57DF7CF2DD9254900EF07F8 /* libclangToolingInclusionsStdlib.a */; };
+		B57DF7D22DD925C600EF07F8 /* libclangTransformer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B57DF7D12DD925C600EF07F8 /* libclangTransformer.a */; };
+		B57DF88D2DD94D4400EF07F8 /* libLLVM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2237943E209B523500B15016 /* libLLVM.framework */; };
+		B57DF88E2DD94D4800EF07F8 /* clang.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22379386209B028600B15016 /* clang.framework */; };
+		B57DF8942DD9540800EF07F8 /* llvm_c.h in Headers */ = {isa = PBXBuildFile; fileRef = B57DF8932DD9540800EF07F8 /* llvm_c.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B57DF8962DD9542D00EF07F8 /* clang_c.h in Headers */ = {isa = PBXBuildFile; fileRef = B57DF8952DD9542D00EF07F8 /* clang_c.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B5B365AF2DD8DEC800C6D744 /* libLLVMWebAssemblyUtils.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B5B365AE2DD8DEC800C6D744 /* libLLVMWebAssemblyUtils.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -414,6 +425,19 @@
 		89DD5C5F239CDE3D00382F34 /* libLLVMWebAssemblyDisassembler.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libLLVMWebAssemblyDisassembler.a; path = ./lib/libLLVMWebAssemblyDisassembler.a; sourceTree = "<group>"; };
 		89DD5C60239CDE3D00382F34 /* libLLVMWebAssemblyInfo.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libLLVMWebAssemblyInfo.a; path = ./lib/libLLVMWebAssemblyInfo.a; sourceTree = "<group>"; };
 		89DD5C73239D1A1D00382F34 /* llc.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = llc.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		B57DF7C12DD9242900EF07F8 /* libclangAnalysisFlowSensitiveModels.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libclangAnalysisFlowSensitiveModels.a; path = lib/libclangAnalysisFlowSensitiveModels.a; sourceTree = "<group>"; };
+		B57DF7C22DD9242900EF07F8 /* libclangAnalysisFlowSensitive.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libclangAnalysisFlowSensitive.a; path = lib/libclangAnalysisFlowSensitive.a; sourceTree = "<group>"; };
+		B57DF7C72DD9245600EF07F8 /* libclangDependencyScanning.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libclangDependencyScanning.a; path = lib/libclangDependencyScanning.a; sourceTree = "<group>"; };
+		B57DF7C92DD924A800EF07F8 /* libclangHandleLLVM.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libclangHandleLLVM.a; path = lib/libclangHandleLLVM.a; sourceTree = "<group>"; };
+		B57DF7CB2DD924BA00EF07F8 /* libclangIndexSerialization.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libclangIndexSerialization.a; path = lib/libclangIndexSerialization.a; sourceTree = "<group>"; };
+		B57DF7CD2DD924C400EF07F8 /* libclangInterpreter.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libclangInterpreter.a; path = lib/libclangInterpreter.a; sourceTree = "<group>"; };
+		B57DF7CF2DD9254900EF07F8 /* libclangToolingInclusionsStdlib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libclangToolingInclusionsStdlib.a; path = lib/libclangToolingInclusionsStdlib.a; sourceTree = "<group>"; };
+		B57DF7D12DD925C600EF07F8 /* libclangTransformer.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libclangTransformer.a; path = lib/libclangTransformer.a; sourceTree = "<group>"; };
+		B57DF8762DD94C6500EF07F8 /* llvm-c.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "llvm-c.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B57DF8822DD94C9200EF07F8 /* clang-c.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = "clang-c.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B57DF8932DD9540800EF07F8 /* llvm_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = llvm_c.h; path = "../../frameworks/llvm-c/llvm_c.h"; sourceTree = "<group>"; };
+		B57DF8952DD9542D00EF07F8 /* clang_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = clang_c.h; path = "../../frameworks/clang-c/clang_c.h"; sourceTree = "<group>"; };
+		B5B365AE2DD8DEC800C6D744 /* libLLVMWebAssemblyUtils.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libLLVMWebAssemblyUtils.a; path = lib/libLLVMWebAssemblyUtils.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -432,6 +456,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B57DF7D22DD925C600EF07F8 /* libclangTransformer.a in Frameworks */,
+				B57DF7D02DD9254900EF07F8 /* libclangToolingInclusionsStdlib.a in Frameworks */,
+				B57DF7CC2DD924BA00EF07F8 /* libclangIndexSerialization.a in Frameworks */,
+				B57DF7CA2DD924A800EF07F8 /* libclangHandleLLVM.a in Frameworks */,
+				B57DF7C82DD9245600EF07F8 /* libclangDependencyScanning.a in Frameworks */,
+				B57DF7C52DD9243F00EF07F8 /* libclangAnalysisFlowSensitive.a in Frameworks */,
+				B57DF7C62DD9243F00EF07F8 /* libclangAnalysisFlowSensitiveModels.a in Frameworks */,
 				223794CF209B573A00B15016 /* libLLVM.framework in Frameworks */,
 				22BAC5BA259CAC8900B51FD6 /* ios_system.xcframework in Frameworks */,
 				22720AB12386EC03005BEB9E /* libclangToolingSyntax.a in Frameworks */,
@@ -517,6 +548,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				22BAC5AC259CAC1300B51FD6 /* libLLVMOrcShared.a in Frameworks */,
+				B5B365AF2DD8DEC800C6D744 /* libLLVMWebAssemblyUtils.a in Frameworks */,
 				222BE5802BE62E6D002E4272 /* libLLVMFrontendOpenACC.a in Frameworks */,
 				22BAC5A8259CAAA700B51FD6 /* libLLVMOrcTargetProcess.a in Frameworks */,
 				22BAC59C259CA94000B51FD6 /* libLLVMCFGuard.a in Frameworks */,
@@ -555,7 +587,6 @@
 				2237949B209B557A00B15016 /* libLLVMAArch64Info.a in Frameworks */,
 				2237949C209B557A00B15016 /* libLLVMAsmPrinter.a in Frameworks */,
 				2237949D209B557A00B15016 /* libLLVMOption.a in Frameworks */,
-				22E95EBE278CA5CD00655675 /* WebAssemblyTypeUtilities.cpp.o in Frameworks */,
 				2237949E209B557A00B15016 /* libLLVMMC.a in Frameworks */,
 				2237949F209B557A00B15016 /* libLLVMDebugInfoDWARF.a in Frameworks */,
 				223794A0209B557A00B15016 /* libLLVMipo.a in Frameworks */,
@@ -654,6 +685,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B57DF8732DD94C6500EF07F8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B57DF88D2DD94D4400EF07F8 /* libLLVM.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B57DF87F2DD94C9200EF07F8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B57DF88E2DD94D4800EF07F8 /* clang.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -723,6 +770,8 @@
 				22379412209B4E3900B15016 /* dis */,
 				22379426209B4F2300B15016 /* link */,
 				2237943F209B523500B15016 /* libLLVM */,
+				B57DF8772DD94C6500EF07F8 /* llvm-c */,
+				B57DF8832DD94C9300EF07F8 /* clang-c */,
 				22C505BD209A3B5800FDDFA9 /* Products */,
 				22C505C7209A3B8700FDDFA9 /* Frameworks */,
 			);
@@ -741,6 +790,8 @@
 				89DD5C73239D1A1D00382F34 /* llc.framework */,
 				228B141523A81EC700FE5B43 /* lld.framework */,
 				2207FAB6244B916A00C28F86 /* ar.framework */,
+				B57DF8762DD94C6500EF07F8 /* llvm-c.framework */,
+				B57DF8822DD94C9200EF07F8 /* clang-c.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -748,6 +799,15 @@
 		22C505C7209A3B8700FDDFA9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B57DF7D12DD925C600EF07F8 /* libclangTransformer.a */,
+				B57DF7CF2DD9254900EF07F8 /* libclangToolingInclusionsStdlib.a */,
+				B57DF7CD2DD924C400EF07F8 /* libclangInterpreter.a */,
+				B57DF7CB2DD924BA00EF07F8 /* libclangIndexSerialization.a */,
+				B57DF7C92DD924A800EF07F8 /* libclangHandleLLVM.a */,
+				B57DF7C72DD9245600EF07F8 /* libclangDependencyScanning.a */,
+				B57DF7C22DD9242900EF07F8 /* libclangAnalysisFlowSensitive.a */,
+				B57DF7C12DD9242900EF07F8 /* libclangAnalysisFlowSensitiveModels.a */,
+				B5B365AE2DD8DEC800C6D744 /* libLLVMWebAssemblyUtils.a */,
 				222BE5832BE6323D002E4272 /* NewPMDriver.cpp.o */,
 				222BE5812BE6313A002E4272 /* libz.tbd */,
 				224ADB1A278DB22D009AC3B9 /* liblldMinGW.a */,
@@ -962,6 +1022,22 @@
 			path = llc;
 			sourceTree = "<group>";
 		};
+		B57DF8772DD94C6500EF07F8 /* llvm-c */ = {
+			isa = PBXGroup;
+			children = (
+				B57DF8932DD9540800EF07F8 /* llvm_c.h */,
+			);
+			path = "llvm-c";
+			sourceTree = "<group>";
+		};
+		B57DF8832DD94C9300EF07F8 /* clang-c */ = {
+			isa = PBXGroup;
+			children = (
+				B57DF8952DD9542D00EF07F8 /* clang_c.h */,
+			);
+			path = "clang-c";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1042,6 +1118,22 @@
 			buildActionMask = 2147483647;
 			files = (
 				89058C39239E7F860094F4DE /* llc.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B57DF8712DD94C6500EF07F8 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B57DF8942DD9540800EF07F8 /* llvm_c.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B57DF87D2DD94C9200EF07F8 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B57DF8962DD9542D00EF07F8 /* clang_c.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1230,6 +1322,44 @@
 			productReference = 89DD5C73239D1A1D00382F34 /* llc.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		B57DF8752DD94C6500EF07F8 /* llvm-c */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B57DF87A2DD94C6500EF07F8 /* Build configuration list for PBXNativeTarget "llvm-c" */;
+			buildPhases = (
+				B57DF8712DD94C6500EF07F8 /* Headers */,
+				B57DF8722DD94C6500EF07F8 /* Sources */,
+				B57DF8732DD94C6500EF07F8 /* Frameworks */,
+				B57DF8742DD94C6500EF07F8 /* Resources */,
+				B57DF88F2DD94D5700EF07F8 /* Copy llvm-c Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "llvm-c";
+			productName = "llvm-c";
+			productReference = B57DF8762DD94C6500EF07F8 /* llvm-c.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		B57DF8812DD94C9200EF07F8 /* clang-c */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B57DF8862DD94C9300EF07F8 /* Build configuration list for PBXNativeTarget "clang-c" */;
+			buildPhases = (
+				B57DF87D2DD94C9200EF07F8 /* Headers */,
+				B57DF87E2DD94C9200EF07F8 /* Sources */,
+				B57DF87F2DD94C9200EF07F8 /* Frameworks */,
+				B57DF8802DD94C9200EF07F8 /* Resources */,
+				B57DF8902DD94DBF00EF07F8 /* Copy clang-c Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "clang-c";
+			productName = "clang-c";
+			productReference = B57DF8822DD94C9200EF07F8 /* clang-c.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1276,6 +1406,12 @@
 					89DD5C66239D1A1D00382F34 = {
 						ProvisioningStyle = Automatic;
 					};
+					B57DF8752DD94C6500EF07F8 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					B57DF8812DD94C9200EF07F8 = {
+						CreatedOnToolsVersion = 15.0;
+					};
 				};
 			};
 			buildConfigurationList = 22C505B6209A3B5800FDDFA9 /* Build configuration list for PBXProject "frameworks" */;
@@ -1302,6 +1438,8 @@
 				89DD5C66239D1A1D00382F34 /* llc */,
 				228B13EA23A81EC700FE5B43 /* lld */,
 				2207FAAA244B916A00C28F86 /* ar */,
+				B57DF8752DD94C6500EF07F8 /* llvm-c */,
+				B57DF8812DD94C9200EF07F8 /* clang-c */,
 			);
 		};
 /* End PBXProject section */
@@ -1377,7 +1515,60 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B57DF8742DD94C6500EF07F8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B57DF8802DD94C9200EF07F8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		B57DF88F2DD94D5700EF07F8 /* Copy llvm-c Headers */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy llvm-c Headers";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"${SRCROOT}/../llvm/include/llvm-c\"\n\nfor header in `find . -name \"*.h\"`;  do\n    ditto \"${header}\" \"${BUILT_PRODUCTS_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}/${header}\"\ndone\n";
+		};
+		B57DF8902DD94DBF00EF07F8 /* Copy clang-c Headers */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy clang-c Headers";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"${SRCROOT}/../clang/include/clang-c\"\n\nfor header in `find . -name \"*.h\"`;  do\n    ditto \"${header}\" \"${BUILT_PRODUCTS_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}/${header}\"\ndone\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		2207FAAB244B916A00C28F86 /* Sources */ = {
@@ -1450,6 +1641,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B57DF8722DD94C6500EF07F8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B57DF87E2DD94C9200EF07F8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
@@ -1471,6 +1676,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/lib",
 				);
 				OTHER_LDFLAGS = (
 					"-all_load",
@@ -1502,6 +1711,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/lib",
 				);
 				OTHER_LDFLAGS = (
 					"-all_load",
@@ -1540,7 +1753,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
 					"-all_load",
 					"-F",
 					..,
@@ -1578,7 +1791,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
 					"-all_load",
 					"-F",
 					..,
@@ -1612,7 +1825,7 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.opt";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -1643,7 +1856,7 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.opt";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -1815,6 +2028,7 @@
 		22379444209B523600B15016 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
@@ -1822,6 +2036,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/include\"";
 				INFOPLIST_FILE = ../frameworks/libLLVM/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
@@ -1837,13 +2052,15 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
 					"-F",
 					..,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.libLLVM";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1851,6 +2068,7 @@
 		22379445209B523600B15016 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALLOW_TARGET_PLATFORM_SPECIALIZATION = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
@@ -1858,6 +2076,7 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/include\"";
 				INFOPLIST_FILE = ../frameworks/libLLVM/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
@@ -1873,13 +2092,15 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
 					"-F",
 					..,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.libLLVM";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -1909,7 +2130,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
 					"-all_load",
 					"-F",
 					..,
@@ -1947,7 +2168,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
 					"-all_load",
 					"-F",
 					..,
@@ -2105,7 +2326,7 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
 					"-F",
 					..,
 				);
@@ -2142,7 +2363,7 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
 					"-F",
 					..,
 				);
@@ -2175,7 +2396,7 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.llc";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2206,11 +2427,175 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.llc";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B57DF87B2DD94C6500EF07F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Nicolas Holzschuch. All rights reserved.";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.llvm-c";
+				PRODUCT_MODULE_NAME = "llvm-c";
+				PRODUCT_NAME = "llvm-c";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B57DF87C2DD94C6500EF07F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Nicolas Holzschuch. All rights reserved.";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.llvm-c";
+				PRODUCT_MODULE_NAME = "llvm-c";
+				PRODUCT_NAME = "llvm-c";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B57DF8872DD94C9300EF07F8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Nicolas Holzschuch. All rights reserved.";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.clang-c";
+				PRODUCT_MODULE_NAME = "clang-c";
+				PRODUCT_NAME = "clang-c";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B57DF8882DD94C9300EF07F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Nicolas Holzschuch. All rights reserved.";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.clang-c";
+				PRODUCT_MODULE_NAME = "clang-c";
+				PRODUCT_NAME = "clang-c";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -2313,6 +2698,24 @@
 			buildConfigurations = (
 				89DD5C71239D1A1D00382F34 /* Debug */,
 				89DD5C72239D1A1D00382F34 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B57DF87A2DD94C6500EF07F8 /* Build configuration list for PBXNativeTarget "llvm-c" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B57DF87B2DD94C6500EF07F8 /* Debug */,
+				B57DF87C2DD94C6500EF07F8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B57DF8862DD94C9300EF07F8 /* Build configuration list for PBXNativeTarget "clang-c" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B57DF8872DD94C9300EF07F8 /* Debug */,
+				B57DF8882DD94C9300EF07F8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
