@@ -1548,7 +1548,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"${SRCROOT}/../llvm/include/llvm-c\"\n\nfor header in `find . -name \"*.h\"`;  do\n    ditto \"${header}\" \"${BUILT_PRODUCTS_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}/${header}\"\ndone\n";
+			shellScript = "cd \"${SRCROOT}/../llvm/include/llvm-c\"\nHEADERS=\"${BUILT_PRODUCTS_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}\"\n\nfor header in `find . -name \"*.h\"`;  do\n    ditto \"${header}\" \"$HEADERS/${header}\"\ndone\n\nrm -rf \"$HEADERS/llvm\"\nmkdir -p \"$HEADERS/llvm/Config\"\ncp \"$SRCROOT/include/llvm/Config/\"*.h \"$HEADERS/llvm/Config\"\n";
 		};
 		B57DF8902DD94DBF00EF07F8 /* Copy clang-c Headers */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1753,7 +1753,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-${CURRENT_ARCH}/lib",
 					"-all_load",
 					"-F",
 					..,
@@ -1791,7 +1791,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-${CURRENT_ARCH}/lib",
 					"-all_load",
 					"-F",
 					..,
@@ -1825,7 +1825,7 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-${CURRENT_ARCH}/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.opt";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -1856,7 +1856,7 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-${CURRENT_ARCH}/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.opt";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -2052,7 +2052,7 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-${CURRENT_ARCH}/lib",
 					"-F",
 					..,
 				);
@@ -2092,7 +2092,7 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-${CURRENT_ARCH}/lib",
 					"-F",
 					..,
 				);
@@ -2130,7 +2130,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-${CURRENT_ARCH}/lib",
 					"-all_load",
 					"-F",
 					..,
@@ -2168,7 +2168,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-${CURRENT_ARCH}/lib",
 					"-all_load",
 					"-F",
 					..,
@@ -2326,7 +2326,7 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-${CURRENT_ARCH}/lib",
 					"-F",
 					..,
 				);
@@ -2363,7 +2363,7 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-${CURRENT_ARCH}/lib",
 					"-F",
 					..,
 				);
@@ -2396,7 +2396,7 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-${CURRENT_ARCH}/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.llc";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2427,7 +2427,7 @@
 				OTHER_LDFLAGS = (
 					"-all_load",
 					"-L",
-					"../build${EFFECTIVE_PLATFORM_NAME}-$(CURRENT_ARCH)/lib",
+					"../build${EFFECTIVE_PLATFORM_NAME}-${CURRENT_ARCH}/lib",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "Nicolas-Holzschuch.llc";
 				PRODUCT_NAME = "$(TARGET_NAME)";
