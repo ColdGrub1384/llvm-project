@@ -485,7 +485,7 @@ do
    # merge simulator builds
    mkdir -p $universal_simulator_framework_path
    pushd $universal_simulator_framework_path
-   cp -r $SIM_BUILDDIR/build/Release-iphonesimulator/$framework.framework .
+   cp -R $SIM_BUILDDIR/build/Release-iphonesimulator/$framework.framework .
    rm $framework.framework/$framework
    lipo -create $SIM_BUILDDIR/build/Release-iphonesimulator/$framework.framework/$framework $SIM_BUILDDIR_ARM64/build/Release-iphonesimulator/$framework.framework/$framework -output $framework.framework/$framework
    popd
@@ -493,7 +493,7 @@ do
    # merge mac catalyst builds
    mkdir -p $universal_catalyst_framework_path
    pushd $universal_catalyst_framework_path
-   cp -r $MACCATALYST_BUILDDIR/build/Release-maccatalyst/$framework.framework .
+   cp -R $MACCATALYST_BUILDDIR/build/Release-maccatalyst/$framework.framework .
    rm $framework.framework/$framework
    lipo -create $MACCATALYST_BUILDDIR/build/Release-maccatalyst/$framework.framework/$framework $MACCATALYST_BUILDDIR_ARM64/build/Release-maccatalyst/$framework.framework/$framework -output $framework.framework/$framework
    popd
