@@ -84,7 +84,7 @@ function(llvm_update_compile_flags name)
 endfunction()
 
 function(add_llvm_symbol_exports target_name export_file)
-  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  if(APPLE)
     set(native_export_file "${target_name}.exports")
     add_custom_command(OUTPUT ${native_export_file}
       COMMAND sed -e "s/^/_/" < ${export_file} > ${native_export_file}
@@ -284,7 +284,7 @@ function(add_link_opts target_name)
   # linker in a context where the optimizations are not important.
   if (NOT uppercase_CMAKE_BUILD_TYPE STREQUAL "DEBUG")
     if(NOT LLVM_NO_DEAD_STRIP)
-      if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+      if(APPLE)
         # ld64's implementation of -dead_strip breaks tools that use plugins.
         set_property(TARGET ${target_name} APPEND_STRING PROPERTY
                      LINK_FLAGS " -Wl,-dead_strip")

@@ -654,7 +654,7 @@ endif ( LLVM_COMPILER_IS_GCC_COMPATIBLE )
 if ( LLVM_COMPILER_IS_GCC_COMPATIBLE AND LLVM_ENABLE_MODULES )
   set(OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
   set(module_flags "-fmodules -fmodules-cache-path=${PROJECT_BINARY_DIR}/module.cache")
-  if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  if (APPLE)
     # On Darwin -fmodules does not imply -fcxx-modules.
     set(module_flags "${module_flags} -fcxx-modules")
   endif()
@@ -1079,7 +1079,7 @@ endif()
 # But MinSizeRel seems to add that automatically, so maybe disable these
 # flags instead if LLVM_NO_DEAD_STRIP is set.
 if(NOT CYGWIN AND NOT MSVC)
-  if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND
+  if(NOT APPLE AND
      NOT uppercase_CMAKE_BUILD_TYPE STREQUAL "DEBUG")
     check_c_compiler_flag("-Werror -fno-function-sections" C_SUPPORTS_FNO_FUNCTION_SECTIONS)
     if (C_SUPPORTS_FNO_FUNCTION_SECTIONS)
