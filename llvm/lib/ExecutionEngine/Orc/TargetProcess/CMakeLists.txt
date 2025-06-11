@@ -1,4 +1,4 @@
-if( CMAKE_HOST_UNIX AND HAVE_LIBRT )
+if( CMAKE_HOST_UNIX AND HAVE_LIBRT AND NOT APPLE )
   set(rt_lib rt)
 endif()
 

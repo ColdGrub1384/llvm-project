@@ -110,7 +110,11 @@ if( NOT PURE_WINDOWS )
     endif()
   endif()
   check_library_exists(dl dlopen "" HAVE_LIBDL)
-  check_library_exists(rt clock_gettime "" HAVE_LIBRT)
+  if (APPLE)
+    set(HAVE_LIBRT 0)
+  else()
+    check_library_exists(rt clock_gettime "" HAVE_LIBRT)
+  endif()
 endif()
 
 # Check for libpfm.

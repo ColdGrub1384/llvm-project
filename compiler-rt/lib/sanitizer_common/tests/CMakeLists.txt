@@ -125,8 +125,10 @@ endif()
 set(SANITIZER_TEST_LINK_LIBS)
 append_list_if(COMPILER_RT_HAS_LIBLOG log SANITIZER_TEST_LINK_LIBS)
 
+if (NOT APPLE)
+  append_list_if(COMPILER_RT_HAS_LIBRT -lrt SANITIZER_TEST_LINK_FLAGS_COMMON)
+endif()
 append_list_if(COMPILER_RT_HAS_LIBDL -ldl SANITIZER_TEST_LINK_FLAGS_COMMON)
-append_list_if(COMPILER_RT_HAS_LIBRT -lrt SANITIZER_TEST_LINK_FLAGS_COMMON)
 append_list_if(COMPILER_RT_HAS_LIBPTHREAD -pthread SANITIZER_TEST_LINK_FLAGS_COMMON)
 # x86_64 FreeBSD 9.2 additionally requires libc++ to build the tests. Also,
 # 'libm' shall be specified explicitly to build i386 tests.

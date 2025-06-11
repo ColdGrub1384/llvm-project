@@ -273,7 +273,7 @@ endif()
 # build might work on ELF but fail on MachO/COFF.
 if(NOT (CMAKE_SYSTEM_NAME MATCHES "Darwin|FreeBSD|OpenBSD|DragonFly|AIX|OS390" OR
         WIN32 OR CYGWIN) AND
-   NOT LLVM_USE_SANITIZER)
+   NOT LLVM_USE_SANITIZER AND NOT APPLE)
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,defs")
 endif()
 

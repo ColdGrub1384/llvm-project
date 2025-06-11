@@ -63,8 +63,11 @@ endif()
 set(INTERCEPTION_TEST_LINK_LIBS)
 append_list_if(COMPILER_RT_HAS_LIBLOG log INTERCEPTION_TEST_LINK_LIBS)
 
+if (NOT APPLE)
+  append_list_if(COMPILER_RT_HAS_LIBRT -lrt INTERCEPTION_TEST_LINK_FLAGS_COMMON)
+endif()
+
 append_list_if(COMPILER_RT_HAS_LIBDL -ldl INTERCEPTION_TEST_LINK_FLAGS_COMMON)
-append_list_if(COMPILER_RT_HAS_LIBRT -lrt INTERCEPTION_TEST_LINK_FLAGS_COMMON)
 append_list_if(COMPILER_RT_HAS_LIBPTHREAD -pthread INTERCEPTION_TEST_LINK_FLAGS_COMMON)
 # x86_64 FreeBSD 9.2 additionally requires libc++ to build the tests. Also,
 # 'libm' shall be specified explicitly to build i386 tests.
