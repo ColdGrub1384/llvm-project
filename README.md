@@ -35,6 +35,10 @@ to learn about the layout of the source code tree.
 iOS version specific information
 ================================
 
+This is a fork [holzschu/llvm-project](https://github.com/holzschu/llvm-project).
+The build script and Swift Package have been removed to compile with [multibuild](https://gatites.no.binarios.cl/git/emma/multibuild) as part of [pyto-runtime](https://gatites.no.binarios.cl/git/pyto/pyto-runtime).
+I added support for other Apple platforms like Mac Catalyst but the important stuff is in the `pyto-runtime` repo anyway.
+
 This is a very experimental port. It's is designed to work inside ios_system
 (https://github.com/holzschu/ios_system), which itself is supposed to be 
 embedded inside shell applications such as OpenTerm, a-Shell or Blink:
