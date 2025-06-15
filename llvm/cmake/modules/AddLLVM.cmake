@@ -2474,6 +2474,8 @@ function(get_host_tool_path tool_name setting_name exe_var_name target_var_name)
   if(LLVM_NATIVE_TOOL_DIR)
     if(EXISTS "${LLVM_NATIVE_TOOL_DIR}/${tool_name}${LLVM_HOST_EXECUTABLE_SUFFIX}")
       set(${setting_name}_DEFAULT "${LLVM_NATIVE_TOOL_DIR}/${tool_name}${LLVM_HOST_EXECUTABLE_SUFFIX}")
+    else()
+      message(FATAL_ERROR "${LLVM_NATIVE_TOOL_DIR}/${tool_name}${LLVM_HOST_EXECUTABLE_SUFFIX}")
     endif()
   endif()
 

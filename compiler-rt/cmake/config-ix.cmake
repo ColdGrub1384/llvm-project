@@ -476,9 +476,9 @@ if(APPLE)
 
     # Note: In order to target x86_64h on OS X the minimum deployment target must
     # be 10.8 or higher.
-    if(MIN_OSX_VERSION VERSION_LESS "10.7")
-      message(FATAL_ERROR "macOS deployment target '${SANITIZER_MIN_OSX_VERSION}' is too old.")
-    endif()
+    #if(MIN_OSX_VERSION VERSION_LESS "10.7")
+    #  message(FATAL_ERROR "macOS deployment target '${SANITIZER_MIN_OSX_VERSION}' is too old.")
+    #endif()
   endif()
 
   set(SANITIZER_MIN_OSX_VERSION "${MIN_OSX_VERSION}" CACHE STRING
@@ -526,15 +526,6 @@ if(APPLE)
 
     foreach(platform ${DARWIN_EMBEDDED_PLATFORMS})
       if(DARWIN_${platform}sim_SYSROOT)
-        set(DARWIN_${platform}sim_CFLAGS
-          ${DARWIN_COMMON_CFLAGS}
-          ${DARWIN_${platform}sim_SANITIZER_MIN_VER_FLAG}
-          -isysroot ${DARWIN_${platform}sim_SYSROOT})
-        set(DARWIN_${platform}sim_LINK_FLAGS
-          ${DARWIN_COMMON_LINK_FLAGS}
-          ${DARWIN_${platform}sim_SANITIZER_MIN_VER_FLAG}
-          -isysroot ${DARWIN_${platform}sim_SYSROOT})
-
         set(DARWIN_${platform}sim_SKIP_CC_KEXT On)
         darwin_test_archs(${platform}sim
           DARWIN_${platform}sim_ARCHS
@@ -557,15 +548,6 @@ if(APPLE)
       endif()
 
       if(DARWIN_${platform}_SYSROOT)
-        set(DARWIN_${platform}_CFLAGS
-          ${DARWIN_COMMON_CFLAGS}
-          ${DARWIN_${platform}_SANITIZER_MIN_VER_FLAG}
-          -isysroot ${DARWIN_${platform}_SYSROOT})
-        set(DARWIN_${platform}_LINK_FLAGS
-          ${DARWIN_COMMON_LINK_FLAGS}
-          ${DARWIN_${platform}_SANITIZER_MIN_VER_FLAG}
-          -isysroot ${DARWIN_${platform}_SYSROOT})
-
         darwin_test_archs(${platform}
           DARWIN_${platform}_ARCHS
           ${toolchain_arches})

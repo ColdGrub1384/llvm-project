@@ -85,7 +85,7 @@
 
 #ifdef __APPLE__
 #include <TargetConditionals.h>
-#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_WATCH || TARGET_OS_TV || TARGET_OS_MACCATALYST
 #include "ios_error.h"
 #undef write
 #include <stdio.h>
@@ -143,7 +143,7 @@ namespace {
 
   cl::opt<bool> ForceInterpreter("force-interpreter",
                                  cl::desc("Force interpretation: disable JIT"),
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
                                  // force use of interpreter on iOS:
                                  // JIT compiler works inside of Xcode, not outside.
                                  cl::init(true));
@@ -568,7 +568,7 @@ int main(int argc, char **argv, char * const *envp) {
     Options.FloatABIType = codegen::getFloatABIForCalls();
 
   builder.setTargetOptions(Options);
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
 	  // For ios_system, add symbols that override the existing ones:
 	  // This needs to be done *before* the engine creation:
 	  // This way, we act on both interpreter and JIT:
@@ -754,7 +754,7 @@ int main(int argc, char **argv, char * const *envp) {
   if (!RemoteMCJIT) {
     // If the program doesn't explicitly call exit, we will need the Exit
     // function later on to make an explicit call, so get the function now.
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
 	  // on iOS, normally, ForceInterpreter = true, but if your run the JIT you need this:
 	  FunctionCallee Exit;
 	  if (!ForceInterpreter) {
@@ -1316,7 +1316,9 @@ Expected<std::unique_ptr<orc::ExecutorProcessControl>> launchRemote() {
   if (pipe(PipeFD[0]) != 0 || pipe(PipeFD[1]) != 0)
     perror("Error creating pipe: ");
 
+  #if !TARGET_OS_WATCH && !TARGET_OS_TV
   ChildPID = fork();
+  #endif
 
   if (ChildPID == 0) {
     // In the child...

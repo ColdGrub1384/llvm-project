@@ -45,10 +45,11 @@
 #endif
 #ifdef HAVE_POSIX_SPAWN
 #include <spawn.h>
+#endif
 
 #if defined(__APPLE__)
 #include <TargetConditionals.h>
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
 #undef HAVE_POSIX_SPAWN // function is present, but not working
 #include "ios_error.h"
 #include <libgen.h>
@@ -67,7 +68,6 @@
 extern char **environ;
 #else
 #include <crt_externs.h> // _NSGetEnviron
-#endif
 #endif
 
 using namespace llvm;
@@ -185,7 +185,7 @@ static bool Execute(ProcessInfo &PI, StringRef Program,
                     unsigned MemoryLimit, std::string *ErrMsg,
                     BitVector *AffinityMask) {
   if (!llvm::sys::fs::exists(Program)
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
        && !ios_executable(Program.str().c_str())  // one of the commands in ios_system
 #endif
     ) {
@@ -291,7 +291,7 @@ static bool Execute(ProcessInfo &PI, StringRef Program,
     MakeErrMsg(ErrMsg, "Couldn't fork");
     return false;
 
-#if (!TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR)
+#if (!TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR && !TARGET_OS_MACCATALYST && !TARGET_OS_WATCH && !TARGET_OS_TV)
     // Child process: Execute the program.
 	case 0: {
 	#else
@@ -341,12 +341,12 @@ static bool Execute(ProcessInfo &PI, StringRef Program,
 			// object destructors cloned from the parent process aren't
 			// redundantly run, and so that any data buffered in stdio buffers
 			// cloned from the parent aren't redundantly written out.
-			#if (!TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR)
+			#if (!TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR && !TARGET_OS_MACCATALYST && !TARGET_OS_WATCH && !TARGET_OS_TV)
 				_exit(errno == ENOENT ? 127 : 126);
 				#endif
 			}
 
-			#if (!TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR)
+			#if (!TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR && !TARGET_OS_MACCATALYST && !TARGET_OS_WATCH && !TARGET_OS_TV)
 				// Parent process: Break out of the switch to do our processing.
 				default:
 				break;
@@ -410,7 +410,7 @@ ProcessInfo llvm::sys::Wait(const ProcessInfo &PI,
                             std::string *ErrMsg,
                             std::optional<ProcessStatistics> *ProcStat,
                             bool Polling) {
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
   int status;
   ProcessInfo WaitResult;
   // iOS: just wait for the process to terminate
@@ -502,7 +502,7 @@ ProcessInfo llvm::sys::Wait(const ProcessInfo &PI,
     *ProcStat = ProcessStatistics{UserT + KernelT, UserT, PeakMemory};
   }
 #endif
-#endif // (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#endif // (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
 
   // Return the proper exit status. Detect error conditions
   // so we can return -1 for them and set ErrMsg informatively.

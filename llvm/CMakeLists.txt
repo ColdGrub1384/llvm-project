@@ -1380,3 +1380,7 @@ endif()
 if (LLVM_INCLUDE_UTILS AND LLVM_INCLUDE_TOOLS)
   add_subdirectory(utils/llvm-locstats)
 endif()
+
+if (APPLE)
+  set(CMAKE_SYSTEM_NAME "Darwin")
+endif()

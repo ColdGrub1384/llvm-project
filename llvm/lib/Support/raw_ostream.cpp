@@ -57,7 +57,7 @@
 
 #ifdef __APPLE__
 #include <TargetConditionals.h>
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
 #include "ios_error.h"
 #undef write
 #endif
@@ -771,7 +771,7 @@ void raw_fd_ostream::write_impl(const char *Ptr, size_t Size) {
   // Make it a reasonably small value.
   MaxWriteSize = 1024 * 1024 * 1024;
 #endif
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
   // When using redirection, ios_system has issues with large writes
   // Using trial and error to find a reasonable size: SIZE_MAX >> 1 is too much.
   // 1024 is enough. TODO: try larger values
@@ -780,7 +780,7 @@ void raw_fd_ostream::write_impl(const char *Ptr, size_t Size) {
 
   do {
     size_t ChunkSize = std::min(Size, MaxWriteSize);
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
        ssize_t ret; 
        if (FD == STDOUT_FILENO) {
                ret = ::write(fileno(thread_stdout), Ptr, ChunkSize); 

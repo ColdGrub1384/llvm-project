@@ -1185,7 +1185,7 @@ Expected<file_t> openNativeFileForRead(const Twine &Name, OpenFlags Flags,
   return ResultFD;
 }
 
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
 	file_t getStdinHandle() { return fileno(thread_stdin); }
 	file_t getStdoutHandle() { return fileno(thread_stdout); }
 	file_t getStderrHandle() { return fileno(thread_stderr); }

@@ -56,7 +56,7 @@
 
 #ifdef __APPLE__
 #include <TargetConditionals.h>
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
 #include <CoreFoundation/CoreFoundation.h>
 #include <objc/objc.h>
 #include <objc/message.h>
@@ -132,7 +132,7 @@ static ExFunc lookupFunction(const Function *F) {
   ExFunc FnPtr = Fns.FuncNames[ExtName];
   if (!FnPtr)
     FnPtr = Fns.FuncNames[("lle_X_" + F->getName()).str()];
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
   if (!FnPtr && (F->getName().str().at(0) == '\x01')) {
 	  std::string funcName = std::string(F->getName().substr(1,  F->getName().size() - 1)); 
 	  FnPtr = Fns.FuncNames[("lle_X_" + funcName)];  
@@ -165,7 +165,7 @@ static ffi_type *ffiTypeFor(Type *Ty) {
   }
   // TODO: Support other types such as StructTyID, ArrayTyID, OpaqueTyID, etc.
   // So, for Swift, it's a StructTyID that breaks things. 
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
   fprintf(thread_stderr, "Type error: type= %d \n", Ty->getTypeID());
 #endif
   report_fatal_error("Type could not be mapped for use with libffi.");
@@ -217,7 +217,7 @@ static void *ffiValueFor(Type *Ty, const GenericValue &AV,
     default: break;
   }
   // TODO: Support other types such as StructTyID, ArrayTyID, OpaqueTyID, etc.
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
   fprintf(thread_stderr, "Type value error: type= %d \n", Ty->getTypeID());
 #endif
   report_fatal_error("Type value could not be mapped for use with libffi.");
@@ -363,7 +363,7 @@ static GenericValue lle_X_exit(FunctionType *FT, ArrayRef<GenericValue> Args) {
 
 // void abort(void)
 static GenericValue lle_X_abort(FunctionType *FT, ArrayRef<GenericValue> Args) {
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
        report_fatal_error("LLVM interpreter raised SIGABRT");
 #else 
   //FIXME: should we report or raise here?
@@ -501,7 +501,7 @@ static GenericValue lle_X_scanf(FunctionType *FT, ArrayRef<GenericValue> args) {
     Args[i] = (char*)GVTOP(args[i]);
 
   GenericValue GV;
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
   outs().flush();
   fflush(thread_stdout);
   GV.IntVal = APInt(32, fscanf(thread_stdin, Args[0], Args[1], Args[2], Args[3], Args[4],
@@ -552,7 +552,7 @@ static GenericValue lle_X_memcpy(FunctionType *FT,
   return GV;
 }
 
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
 
 // Required because it's a vararg function
 static GenericValue lle_X_open(FunctionType *FT,
@@ -655,7 +655,7 @@ static GenericValue lle_X_objc_msgSend(FunctionType *FT,
 // 
 #endif 
 
-#endif //  (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#endif //  (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
 
 void Interpreter::initializeExternalFunctions() {
   auto &Fns = getFunctions();
@@ -671,7 +671,7 @@ void Interpreter::initializeExternalFunctions() {
   Fns.FuncNames["lle_X_fprintf"]      = lle_X_fprintf;
   Fns.FuncNames["lle_X_memset"]       = lle_X_memset;
   Fns.FuncNames["lle_X_memcpy"]       = lle_X_memcpy;
-#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR)
+#if (TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_MACCATALYST  || TARGET_OS_WATCH || TARGET_OS_TV)
   // Variadic argument functions (vararg). 
   Fns.FuncNames["lle_X_open"]     = lle_X_open;
   Fns.FuncNames["lle_X__open"]     = lle_X_open;

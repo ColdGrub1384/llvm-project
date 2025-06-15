@@ -122,7 +122,7 @@ if(APPLE)
   # not the command line tools (or is using macOS 10.14 or newer). If this is
   # the case, we need to find the OS X sysroot to pass to clang.
   if(NOT EXISTS /usr/include/c++)
-    execute_process(COMMAND xcrun -sdk macosx --show-sdk-path
+    execute_process(COMMAND xcrun -sdk ${SDK_NAME} --show-sdk-path
        OUTPUT_VARIABLE OSX_SYSROOT
        ERROR_QUIET
        OUTPUT_STRIP_TRAILING_WHITESPACE)

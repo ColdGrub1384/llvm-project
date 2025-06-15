@@ -32,12 +32,16 @@ page for detailed information on configuring and compiling LLVM. You can visit
 [Directory Layout](https://llvm.org/docs/GettingStarted.html#directory-layout)
 to learn about the layout of the source code tree.
 
-iOS version specific information
-================================
+Building
+========
 
 This is a fork [holzschu/llvm-project](https://github.com/holzschu/llvm-project).
-The build script and Swift Package have been removed to compile with [multibuild](https://gatites.no.binarios.cl/git/emma/multibuild) as part of [pyto-runtime](https://gatites.no.binarios.cl/git/pyto/pyto-runtime).
-I added support for other Apple platforms like Mac Catalyst but the important stuff is in the `pyto-runtime` repo anyway.
+The build script and Swift Package have been removed to instead compile with [multibuild](https://github.com/ColdGrub1384/multibuild) as part of [pyto-runtime](https://github.com/ColdGrub1384/Pyto).
+I added support for other Apple platforms like Mac Catalyst, watchOS and tvOS because why not but the important stuff is in the `pyto-runtime`repo anyway because I'm having all my dependencies in a single place.
+See [BUILDING](BUILDING.md).
+
+iOS version specific information
+================================
 
 This is a very experimental port. It's is designed to work inside ios_system
 (https://github.com/holzschu/ios_system), which itself is supposed to be 
