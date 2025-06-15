@@ -1,16 +1,16 @@
 # Building
 
 As I'm writting this I tested this with iOS + Simulator, watchOS + Simulator, tvOS + Simulator and Mac Catalyst.
-
 The code provided below can be used to compile with [multibuild](https://github.com/ColdGrub1384/multibuild).
 
-This generates Xcode Frameworks and a Swift Package from libraries declared in `products`. I mix libclang and the clang tool in one library. `<libclang-cpp-object-files>` is an array of object files used to generate `libclang-cpp.dylib`, since we're relinking with the clang cli. I personally store the array in a JSON file.
 
 <details>
-    <summary>Project body</summary>
+<summary><h2>Project declaration</h2></summary>
+
+This generates Xcode Frameworks and a Swift Package from libraries declared in `products`. I mix libclang and the clang tool in one library. `<libclang-cpp-object-files>` is an array of object files used to generate `libclang-cpp.dylib`, since we're relinking with the clang cli. I personally store the array in a JSON file.
     
-    ```swift
-    Project(
+```swift
+Project(
     directoryURL: rootURL.appendingPathComponent("llvm-project/llvm"),
     version: .custom("19.0.0"),
     dependencies: [.name("ios_system")],
@@ -21,7 +21,7 @@ This generates Xcode Frameworks and a Swift Package from libraries declared in `
 
             // libclang-cpp + clang
             .dynamicLibrary(
-                objectFiles: <libclang-cpp-object-files>+[
+                objectFiles: /*<libclang-cpp-object-files>+*/[
                 "tools/clang/tools/driver/CMakeFiles/clang.dir/driver.cpp.o",
                 "tools/clang/tools/driver/CMakeFiles/clang.dir/cc1_main.cpp.o",
                 "tools/clang/tools/driver/CMakeFiles/clang.dir/cc1as_main.cpp.o",
@@ -185,15 +185,15 @@ This generates Xcode Frameworks and a Swift Package from libraries declared in `
         ar.launch()
         ar.waitUntilExit()
     }
-}
+} 
 ```
 </details>
 
 <details>
-    <summary>libclang-cpp object files</summary>
-    
-    ```swift
-    [
+<summary><h2><code>libclang-cpp.dylib</code> object files</h2></summary>
+
+```json
+[
     "tools/clang/lib/Basic/CMakeFiles/obj.clangBasic.dir/Attributes.cpp.o",
     "tools/clang/lib/Basic/CMakeFiles/obj.clangBasic.dir/Builtins.cpp.o",
     "tools/clang/lib/Basic/CMakeFiles/obj.clangBasic.dir/CLWarnings.cpp.o",
@@ -1055,7 +1055,7 @@ This generates Xcode Frameworks and a Swift Package from libraries declared in `
     "tools/clang/tools/clang-fuzzer/handle-llvm/CMakeFiles/obj.clangHandleLLVM.dir/handle_llvm.cpp.o",
     "tools/clang/tools/clang-shlib/CMakeFiles/clang-cpp.dir/clang-shlib.cpp.o"
 ]
-    ```
+```
 </details>
 
 You can use the `<build_directory>/build.ninja` file to see how executables are linked so you can port the tool you want to a dynamic library or package the binaries however you want.
