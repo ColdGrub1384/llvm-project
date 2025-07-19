@@ -25,6 +25,10 @@
 #include <unistd.h>
 #endif
 
+#if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR || TARGET_OS_MACCATALYST || TARGET_OS_WATCH || TARGET_OS_TV
+#include "ios_error.h"
+#endif
+
 namespace Fortran::runtime {
 
 // cmdstat specified in 16.9.73
@@ -136,7 +140,7 @@ void RTNAME(ExecuteCommandLine)(const Descriptor &command, bool wait,
 
   if (wait) {
     // either wait is not specified or wait is true: synchronous mode
-    int status{std::system(newCmd)};
+    int status{system(newCmd)};
     int exitStatusVal{TerminationCheck(status, cmdstat, cmdmsg, terminator)};
     // If sync, assigned processor-dependent exit status. Otherwise unchanged
     CheckAndStoreIntToDescriptor(exitstat, exitStatusVal, terminator);
@@ -203,7 +207,7 @@ void RTNAME(ExecuteCommandLine)(const Descriptor &command, bool wait,
         }
         exit(EXIT_FAILURE);
       }
-      int status{std::system(newCmd)};
+      int status{system(newCmd)};
       TerminationCheck(status, cmdstat, cmdmsg, terminator);
       exit(status);
     }
