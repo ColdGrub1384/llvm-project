@@ -185,7 +185,11 @@ void RTNAME(ExecuteCommandLine)(const Descriptor &command, bool wait,
     }
     FreeMemory(wcmd);
 #else
+    #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR || TARGET_OS_MACCATALYST || TARGET_OS_WATCH || TARGET_OS_TV
+    pid_t pid{ios_fork()};
+    #else
     pid_t pid{fork()};
+    #endif
     if (pid < 0) {
       if (!cmdstat) {
         terminator.Crash("Fork failed with pid: %d.", pid);
